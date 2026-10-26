@@ -1,0 +1,910 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>I win · A Soul Score</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="I win, a soul score by Inas: 47 songs, two voices, nine rooms. Swipe the rooms, guess the echoes, beat chance.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a night score in swipeable decks. One dark ground, a 1160px column; each section is a row of cards you scroll to the left. Mono = the machine, serif = the soul. */
+:root{
+  color-scheme: dark;
+  --bg:#121119; --bg-glass:rgba(18,17,25,.92); --panel:#1a1922; --panel-2:#23212d;
+  --line:#2f2d3b; --line-2:#433f54;
+  --ink:#efedf5; --ink-2:#d8d5e3; --muted:#aaa6bb; --dim:#8b879d;
+  --a:#e2652c; --pic:#3987e5;
+  --persona:#c98500; --shadow:#d55181; --anima:#9085e9; --self:#ece9f4;
+  --f-serif:'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --f-sans:'Instrument Sans', 'Helvetica Neue', Arial, sans-serif;
+  --f-mono:'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:64px}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+::selection{background:var(--a);color:var(--bg)}
+a{color:var(--ink-2)} a:hover{color:var(--ink)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+h1,h2,h3{font-weight:400;margin:0} p{margin:0}
+.gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1160px;margin:0 auto}
+.eyebrow{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.ico svg{display:block;width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.ico{display:inline-block;flex:none}
+
+/* nav */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg-glass);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top .wrap{position:relative;display:flex;align-items:center;gap:16px;min-height:52px}
+.brand{font-family:var(--f-serif);font-size:23px;line-height:1;text-decoration:none;color:var(--ink);flex:none}
+.top ol{list-style:none;margin:0;padding:0;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;min-width:0;flex:1}
+.top ol::-webkit-scrollbar{display:none}
+.nl{display:block;padding:9px 10px;font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;white-space:nowrap;border-radius:6px}
+.nl:hover{color:var(--ink);background:var(--panel)} .nl.on{color:var(--ink);background:var(--panel-2)}
+.prog{position:absolute;left:0;bottom:-1px;height:2px;width:0;background:linear-gradient(90deg,var(--a),var(--pic))}
+
+/* sections */
+main section{padding-block:clamp(56px,7vw,96px);border-top:1px solid var(--line)}
+main section:first-child{border-top:0;padding-top:clamp(40px,6vw,80px)}
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 24px;margin-bottom:24px}
+.head .t{display:flex;flex-direction:column;gap:10px;min-width:0;max-width:640px}
+.head h2{font-family:var(--f-serif);font-size:clamp(36px,5vw,58px);line-height:1;letter-spacing:-.01em;text-wrap:balance}
+.lede{font-family:var(--f-serif);font-size:clamp(19px,2vw,23px);line-height:1.3;color:var(--ink-2);max-width:44ch}
+.cap{font-size:13.5px;line-height:1.5;color:var(--muted);max-width:70ch}
+
+/* deck: cards in a row you scroll to the left */
+.deck{display:grid;grid-auto-flow:column;grid-auto-columns:min(340px,84%);gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;padding:4px 2px 16px;scrollbar-width:thin;scrollbar-color:var(--line-2) transparent}
+.deck::-webkit-scrollbar{height:6px} .deck::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:3px}
+.deck>*{scroll-snap-align:start}
+.deck.wide{grid-auto-columns:min(420px,88%)}
+.ctl{display:flex;align-items:center;gap:10px;flex:none}
+.arrow{width:44px;height:44px;border-radius:50%;border:1px solid var(--line-2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink)}
+.arrow:hover{background:var(--panel-2)} .arrow:disabled{opacity:.3;cursor:default;background:transparent}
+.arrow .ico{width:18px;height:18px}
+.count{font-family:var(--f-mono);font-size:12px;color:var(--muted);min-width:46px;text-align:center;font-variant-numeric:tabular-nums}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:14px;min-width:0}
+
+/* hero */
+.hero{display:flex;flex-direction:column;gap:22px}
+.kick{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px}
+.hero h1{font-family:var(--f-serif);font-size:clamp(96px,18vw,210px);line-height:.86;letter-spacing:-.02em}
+.thesis{font-family:var(--f-serif);font-size:clamp(28px,3.8vw,46px);line-height:1.1;max-width:24ch;text-wrap:balance}
+.qs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(230px,100%),1fr));gap:12px}
+.q{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--line);border-radius:14px}
+.q .ico{width:30px;height:30px;color:var(--muted)}
+.q span{display:flex;flex-direction:column;gap:2px}
+.q b{font-weight:400;font-family:var(--f-serif);font-size:22px;line-height:1.15}
+.legend{display:flex;flex-wrap:wrap;align-items:center;gap:8px 22px;font-size:14px;color:var(--ink-2)}
+.legend>span{display:inline-flex;align-items:center;gap:8px}
+.legend .note{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.sq{width:12px;height:12px;border-radius:3px;background:var(--c);flex:none;display:inline-block}
+.ci{width:12px;height:12px;border-radius:50%;background:var(--c);flex:none;display:inline-block}
+.score{display:flex;flex-wrap:wrap;align-items:flex-start;gap:22px 10px}
+.axis{flex:none;width:34px;height:100px;display:flex;flex-direction:column;justify-content:space-between;font:11px/14px var(--f-mono);color:var(--dim)}
+.room{flex:none;display:flex;flex-direction:column;gap:8px}
+.field{position:relative;height:100px;display:flex;gap:2px}
+.field::before{content:"";position:absolute;left:0;right:0;top:49px;border-top:1px solid var(--line-2)}
+.room.epi .field::after{content:"";position:absolute;inset:-6px -5px;border:1px dashed var(--line-2);border-radius:8px;pointer-events:none}
+.mk{position:relative;flex:none;width:16px;height:100px;border:0;padding:3px 0;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;border-radius:4px}
+.mk.t{justify-content:flex-start}.mk.n{justify-content:center}.mk.y{justify-content:flex-end}
+.mk i{display:block;width:12px;height:12px;border-radius:3px;background:var(--c)}
+.mk.pic i{border-radius:50%}
+.mk:hover{background:var(--panel)} .mk.sel{background:var(--panel-2)}
+.mk.sel i{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--ink)}
+.room .rn{font-family:var(--f-serif);font-size:15.5px;line-height:1.1;color:var(--ink-2)}
+.readout{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;padding:14px 18px;border:1px solid var(--line);border-radius:14px;min-height:56px}
+.readout .n{font-family:var(--f-mono);font-size:12px;color:var(--dim)}
+.readout .tt{font-family:var(--f-serif);font-size:24px;line-height:1.1}
+.readout .by{color:var(--muted);font-size:14px}
+.readout .to{font-family:var(--f-mono);font-size:12px;color:var(--ink-2)}
+
+/* flip cards */
+.flip{position:relative;height:250px;border:0;padding:0;background:transparent;cursor:pointer;perspective:1200px;text-align:left}
+.flip .in{position:absolute;inset:0;transition:transform .55s cubic-bezier(.2,.7,.2,1);transform-style:preserve-3d}
+.flip[aria-pressed="true"] .in{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden;border-radius:16px;padding:22px;display:flex;flex-direction:column;justify-content:space-between;gap:12px}
+.front{background:var(--panel);border:1px solid var(--line)}
+.front .m{font-family:var(--f-mono);font-size:15px;line-height:1.5;color:var(--ink-2)}
+.front .tag,.back .tag{display:flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.front .tag .ico,.back .tag .ico{width:18px;height:18px}
+.back{background:var(--ink);color:var(--bg);transform:rotateY(180deg)}
+.back .tag{color:#55526a}
+.back p{font-family:var(--f-serif);font-size:25px;line-height:1.2}
+.hint{font-family:var(--f-mono);font-size:11px;color:var(--dim)}
+.stay{height:250px;border-radius:16px;padding:22px;display:flex;flex-direction:column;justify-content:space-between;background:var(--panel-2);border:1px solid var(--line-2)}
+.stay p{font-family:var(--f-serif);font-size:27px;line-height:1.12}
+.stay .two{display:flex;gap:8px}
+
+/* rooms */
+.rc .top2{display:flex;justify-content:space-between;align-items:flex-start}
+.rc .num{font-family:var(--f-mono);font-size:12px;color:var(--dim)}
+.rc .ico.big{width:34px;height:34px;color:var(--ink-2)}
+.rc h3{font-family:var(--f-serif);font-size:34px;line-height:1}
+.rc .line{font-family:var(--f-serif);font-size:20px;line-height:1.25;color:var(--ink-2);flex:1}
+.mini{position:relative;height:58px;display:flex;gap:3px}
+.mini::before{content:"";position:absolute;left:0;right:0;top:28px;border-top:1px solid var(--line-2)}
+.mini span{position:relative;width:11px;height:58px;display:flex;flex-direction:column;align-items:center;padding:2px 0}
+.mini span.t{justify-content:flex-start}.mini span.n{justify-content:center}.mini span.y{justify-content:flex-end}
+.mini i{display:block;width:10px;height:10px;border-radius:2.5px;background:var(--c)}
+.mini span.pic i{border-radius:50%}
+.rc .foot{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.lead{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink-2)}
+.lead i{width:18px;height:0;border-top:2.5px solid var(--c)} .lead i.dash{border-top-style:dashed}
+.rc .fact{font-family:var(--f-mono);font-size:11.5px;line-height:1.5;color:var(--muted)}
+
+/* echoes game */
+.pips{display:flex;gap:6px;flex-wrap:wrap}
+.pips i{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--line-2)}
+.pips i.ok{background:var(--ink);border-color:var(--ink)}
+.pips i.no{border-color:var(--dim);background:repeating-linear-gradient(45deg,transparent 0 3px,var(--dim) 3px 4px)}
+.qc .qtop{display:flex;align-items:center;gap:12px}
+.qc .badge{width:48px;height:48px;border-radius:50%;border:1px solid var(--line-2);display:flex;align-items:center;justify-content:center;color:var(--ink)}
+.qc .badge .ico{width:24px;height:24px}
+.qc .qn{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.qc .clue{font-family:var(--f-serif);font-size:20px;line-height:1.25;color:var(--ink-2)}
+.qc .qq{font-weight:600;font-size:15.5px;line-height:1.35}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opts button{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:46px;padding:10px 14px;border:1px solid var(--line-2);border-radius:12px;background:transparent;cursor:pointer;text-align:left;font-size:15px;color:var(--ink)}
+.opts button:hover:not(:disabled){background:var(--panel-2);border-color:var(--muted)}
+.opts button:disabled{cursor:default}
+.opts button.right{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.opts button.wrong{border-style:dashed;color:var(--dim);text-decoration:line-through}
+.opts button .ico{width:18px;height:18px}
+.reveal{font-family:var(--f-serif);font-size:18.5px;line-height:1.3;color:var(--ink-2);border-top:1px solid var(--line);padding-top:12px}
+.reveal b{font-family:var(--f-mono);font-weight:400;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);display:block;margin-bottom:4px}
+.nextq{align-self:flex-start}
+.btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:10px 16px;border:1px solid var(--line-2);border-radius:999px;background:transparent;cursor:pointer;font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)} .btn.primary:hover{background:var(--ink-2)}
+.btn .ico{width:16px;height:16px}
+.final{justify-content:center;align-items:flex-start;background:var(--panel-2)}
+.final .big{font-family:var(--f-serif);font-size:84px;line-height:.9}
+.final p.say{font-family:var(--f-serif);font-size:26px;line-height:1.15}
+
+/* soul line */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:8px 14px 8px 10px;border:1px solid var(--line);border-radius:999px;background:transparent;cursor:pointer;color:var(--ink-2);font-size:14px}
+.chip .ico{width:22px;height:22px;color:var(--c)}
+.chip small{font-family:var(--f-mono);font-size:10.5px;color:var(--dim)}
+.chip[aria-pressed="true"]{background:var(--panel-2);border-color:var(--ink-2);color:var(--ink)}
+.chart{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 14px 10px}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart svg text{fill:var(--dim);font-family:var(--f-mono);font-size:11px}
+.chart svg text.lab{fill:var(--ink-2);font-size:12px}
+.chart svg .grid{stroke:var(--line);stroke-width:1}
+.chart svg .avg{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 4}
+.chart svg .band{fill:var(--panel-2)}
+.chart svg .xh{stroke:var(--line-2);stroke-width:1}
+.story{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:12px 24px;margin-top:20px}
+.story p{font-family:var(--f-serif);font-size:20px;line-height:1.25;color:var(--ink-2);border-top:1px solid var(--line);padding-top:10px}
+.story b{display:block;font-family:var(--f-mono);font-weight:400;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:4px}
+
+/* beat chance */
+.game{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:20px}
+.board{display:flex;flex-direction:column;gap:18px}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.ostrip{display:flex;flex-wrap:wrap;gap:4px}
+.ostrip span{width:20px;height:20px;border-radius:5px;background:var(--c)}
+.ostrip span.pic{border-radius:50%}
+@keyframes pop{from{transform:scale(.3);opacity:0}to{transform:none;opacity:1}}
+.ostrip.anim span{animation:pop .35s both}
+.res{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.res .big{font-family:var(--f-serif);font-size:88px;line-height:.85}
+.res .who{font-family:var(--f-serif);font-size:24px;line-height:1.15;max-width:18ch}
+.ckrow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.ck{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.ck .dot{width:52px;height:52px;border-radius:50%;border:1.5px dashed var(--line-2);display:flex;align-items:center;justify-content:center;color:var(--dim);transition:background .25s,color .25s}
+.ck .dot .ico{width:24px;height:24px}
+.ck.ok .dot{background:var(--ink);color:var(--bg);border:1.5px solid var(--ink)}
+.ck .lb{font-size:12px;line-height:1.25;color:var(--muted)}
+.ck.ok .lb{color:var(--ink)}
+.tally{display:flex;flex-direction:column;gap:14px}
+.tally .row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-top:1px solid var(--line);padding-top:10px}
+.tally .row span{font-size:14px;color:var(--muted)}
+.tally .row b{font-family:var(--f-serif);font-weight:400;font-size:30px;line-height:1;font-variant-numeric:tabular-nums}
+.meter{height:10px;border-radius:5px;background:var(--panel-2);position:relative;overflow:hidden}
+.meter i{position:absolute;inset:0 auto 0 0;background:var(--ink);border-radius:5px}
+
+
+/* bubbles: the platform's twelve listening characters */
+.bubbles{position:relative;height:440px;border:1px solid var(--line);border-radius:16px;background:var(--panel);overflow:hidden}
+@media (max-width:600px){.bubbles{height:560px}}
+.bub{position:absolute;animation:drift var(--dur) ease-in-out infinite;animation-delay:var(--del)}
+@keyframes drift{0%,100%{transform:translate(0,0)}33%{transform:translate(var(--dx),var(--dy))}66%{transform:translate(calc(var(--dx) * -.6),calc(var(--dy) * .8))}}
+.bub button{position:relative;width:100%;height:100%;border-radius:50%;border:1px solid rgba(239,237,245,.3);background:radial-gradient(circle at 32% 28%,rgba(239,237,245,.24),rgba(239,237,245,.06) 36%,rgba(239,237,245,.02) 70%);box-shadow:inset 0 0 24px rgba(144,133,233,.2),inset -6px -8px 18px rgba(57,135,229,.12);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px;text-align:center;transition:transform .25s,opacity .3s,border-color .25s}
+.bub button:hover{transform:scale(1.06)}
+.bub .nm{font-family:var(--f-serif);font-size:var(--fs);line-height:1.02;color:var(--ink)}
+.bub .gp{font-family:var(--f-mono);font-size:10px;letter-spacing:.04em;color:var(--muted)}
+.bub button::after{content:"";position:absolute;inset:-2px;border-radius:50%;border:2px solid var(--ink-2);opacity:0;pointer-events:none}
+.bub.burst button::after{animation:burst .55s ease-out}
+@keyframes burst{from{opacity:.9;transform:scale(1)}to{opacity:0;transform:scale(1.8)}}
+.bub.popped button{transform:scale(.6);opacity:.5;border-style:dashed;background:transparent;box-shadow:none}
+.bub.popped button:hover{transform:scale(.66)}
+.bub.sel button{border:2px solid var(--ink);opacity:1}
+.bubinfo{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:16px 36px;margin-top:14px}
+.bubinfo .nm2{font-family:var(--f-serif);font-size:34px;line-height:1}
+.bubinfo p{color:var(--ink-2)}
+.bubinfo p.me{font-family:var(--f-serif);font-size:23px;line-height:1.25;color:var(--ink)}
+.popcount{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+@media (prefers-reduced-motion: reduce){.bub{animation:none}.bub.burst button::after{animation:none}.bub button{transition:none}}
+
+/* listen + promise */
+.cue{display:flex;flex-direction:column;gap:14px;padding:20px;border:1px solid var(--line);border-radius:16px;min-height:170px}
+.cue .ico{width:30px;height:30px;color:var(--c,var(--ink-2))}
+.cue p{font-family:var(--f-serif);font-size:23px;line-height:1.2}
+.promise{display:flex;flex-direction:column;gap:18px;margin-top:clamp(56px,7vw,88px)}
+.promise .art{font-family:var(--f-serif);font-size:clamp(64px,11vw,136px);line-height:.94}
+.promise .form{font-family:var(--f-serif);font-size:clamp(24px,2.8vw,34px);line-height:1.2;max-width:30ch;text-wrap:balance}
+.promise .soft{font-family:var(--f-serif);font-size:clamp(19px,2vw,23px);line-height:1.35;color:var(--muted);max-width:44ch}
+.sig{display:flex;align-items:center;gap:10px}
+.sig b{font-family:var(--f-serif);font-style:italic;font-weight:400;font-size:44px;line-height:1;margin-left:6px}
+details.more{border-top:1px solid var(--line);padding-top:12px;margin-top:28px}
+details.more summary{cursor:pointer;font-family:var(--f-mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);min-height:32px;display:flex;align-items:center}
+details.more p{margin-top:10px}
+footer{border-top:1px solid var(--line);padding-block:20px 40px}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px;font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+#tip{position:fixed;z-index:50;pointer-events:none;max-width:260px;padding:9px 11px;background:var(--panel-2);border:1px solid var(--line-2);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.4);font-size:13px}
+#tip .tt{font-weight:600} #tip .tm{color:var(--muted);font-size:12px}
+#tip .tr{display:flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:11.5px;color:var(--ink-2);margin-top:3px}
+#tip .tr i{width:14px;height:0;border-top:2.5px solid var(--c)} #tip .tr i.dash{border-top-style:dashed}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}.flip .in{transition:none}.ostrip.anim span{animation:none}.ck .dot{transition:none}}
+</style>
+
+<nav class="top" aria-label="Sections">
+  <div class="wrap gut">
+    <a class="brand" href="#start">I win</a>
+    <ol id="navList">
+      <li><a class="nl" href="#talk">The machine</a></li>
+      <li><a class="nl" href="#bubbles">Bubbles</a></li>
+      <li><a class="nl" href="#rooms">Rooms</a></li>
+      <li><a class="nl" href="#echoes">Echoes</a></li>
+      <li><a class="nl" href="#soul">Soul line</a></li>
+      <li><a class="nl" href="#chance">Beat chance</a></li>
+      <li><a class="nl" href="#listen">Listen</a></li>
+    </ol>
+    <div class="prog" id="prog"></div>
+  </div>
+</nav>
+
+<main>
+  <section id="start" class="gut">
+    <div class="wrap hero">
+      <div class="kick eyebrow"><span>a soul score by Inas</span><span>47 songs · 2 voices · 9 rooms</span></div>
+      <h1>I win</h1>
+      <p class="thesis">my soul’s war against the machines, and the long way back to myself.</p>
+      <div class="qs">
+        <div class="q"><span class="ico" data-icon="ballot"></span><span><span class="eyebrow">political</span><b>who decides what we hear next?</b></span></div>
+        <div class="q"><span class="ico" data-icon="people"></span><span><span class="eyebrow">social</span><b>who gets to tell us who we are?</b></span></div>
+        <div class="q"><span class="ico" data-icon="scale"></span><span><span class="eyebrow">moral</span><b>what do we owe our own soul?</b></span></div>
+      </div>
+      <div class="legend" style="margin-top:14px">
+        <span><i class="sq" style="--c:var(--a)"></i>A, the voice that goes to war</span>
+        <span><i class="ci" style="--c:var(--pic)"></i>Pic, the voice that answers</span>
+        <span class="note">high: to them · low: to you · middle: no words</span>
+      </div>
+      <div class="score" id="scoreStrip"></div>
+      <div class="readout" id="readout" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section id="talk" class="gut">
+    <div class="wrap">
+      <div class="head">
+        <div class="t"><span class="eyebrow">the machine talks</span><h2>tap a card. I answer.</h2></div>
+        <div class="ctl" data-for="talkDeck"></div>
+      </div>
+      <div class="deck" id="talkDeck">
+        <button type="button" class="flip" aria-pressed="false"><span class="in"><span class="face front"><span class="tag"><span class="ico" data-icon="cpu"></span>the machine</span><span class="m">› up next: more of what you like</span><span class="hint">tap to answer</span></span><span class="face back"><span class="tag"><span class="ico" data-icon="heart"></span>me</span><p>it knows what keeps me listening. it doesn’t know what I’m looking for.</p></span></span></button>
+        <button type="button" class="flip" aria-pressed="false"><span class="in"><span class="face front"><span class="tag"><span class="ico" data-icon="cpu"></span>the machine</span><span class="m">› your listening personality is ready</span><span class="hint">tap to answer</span></span><span class="face back"><span class="tag"><span class="ico" data-icon="heart"></span>me</span><p>no profile can tell me who I am. I had to go and find out, one song at a time.</p></span></span></button>
+        <button type="button" class="flip" aria-pressed="false"><span class="in"><span class="face front"><span class="tag"><span class="ico" data-icon="cpu"></span>the machine</span><span class="m">› shuffle: on</span><span class="hint">tap to answer</span></span><span class="face back"><span class="tag"><span class="ico" data-icon="heart"></span>me</span><p>I placed every song by hand. chance tried 10,000 times. fewer than 4 in 100 found my path.</p></span></span></button>
+        <button type="button" class="flip" aria-pressed="false"><span class="in"><span class="face front"><span class="tag"><span class="ico" data-icon="cpu"></span>the machine</span><span class="m">› soon, AI will know you better than you know yourself</span><span class="hint">tap to answer</span></span><span class="face back"><span class="tag"><span class="ico" data-icon="heart"></span>me</span><p>maybe. that’s why I went first.</p></span></span></button>
+        <div class="stay"><span class="two" aria-hidden="true"><i class="sq" style="--c:var(--a)"></i><i class="ci" style="--c:var(--pic)"></i></span><p>in a time of AI bubbles, knowing yourself is the one thing nobody can sell you.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="bubbles" class="gut">
+    <div class="wrap">
+      <div class="head">
+        <div class="t"><span class="eyebrow">the platform’s profiles</span><h2>the bubbles they put you in</h2><p class="lede">a streaming platform sorts its listeners into twelve characters. pop each bubble to see what it would miss in my work.</p></div>
+        <div class="ctl"><span class="popcount" id="popCount" aria-live="polite">0 / 12 popped</span><button type="button" class="btn" id="blowAgain">blow new bubbles</button></div>
+      </div>
+      <div class="bubbles" id="bubField" role="group" aria-label="Twelve listening characters"></div>
+      <div class="card bubinfo" id="bubInfo" aria-live="polite"></div>
+      <p class="cap" style="margin-top:12px">The twelve listening characters of Spotify’s “Me in 2023” (Wrapped 2023). What each one would miss is my reading.</p>
+    </div>
+  </section>
+  <section id="rooms" class="gut">
+    <div class="wrap">
+      <div class="head">
+        <div class="t"><span class="eyebrow">nine rooms</span><h2>the way through</h2><p class="lede">I named each room myself. swipe through them in order.</p></div>
+        <div class="ctl" data-for="roomDeck"></div>
+      </div>
+      <div class="deck" id="roomDeck"></div>
+    </div>
+  </section>
+
+  <section id="echoes" class="gut">
+    <div class="wrap">
+      <div class="head">
+        <div class="t"><span class="eyebrow">guess the echo</span><h2>you already know this story</h2><p class="lede">every room has an echo in a film, a book or a song you know. find all ten.</p><div class="pips" id="pips" aria-label="Echoes found"></div></div>
+        <div class="ctl" data-for="quizDeck"></div>
+      </div>
+      <div class="deck wide" id="quizDeck"></div>
+    </div>
+  </section>
+
+  <section id="soul" class="gut">
+    <div class="wrap">
+      <div class="head">
+        <div class="t"><span class="eyebrow">the score of the soul</span><h2>four figures, one path, drawn twice</h2><p class="lede">Jung named four figures the soul meets on its way. tap one to follow it through my order.</p></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="chips" id="figChips"></div>
+        <div class="chart" id="lineChart"></div>
+        <p class="cap">Each point averages eight neighbouring songs; 1 is a figure’s average across the work. The 32 songs with enough words are counted (songs 1 to 39). Numbers along the top are the rooms. Hover or tap the chart to read it.</p>
+      </div>
+      <div class="story">
+        <p><b>first turn</b>the mask and the shadow open. the soul-guide surges at the pact. the Self arrives in room 3.</p>
+        <p><b>second turn</b>the mask comes back as magic and ego. the soul-guide leads the way back to words, and to the water.</p>
+        <p><b>after</b>the shadow rises once more before the end. the path is a spiral, not a straight line.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="chance" class="gut">
+    <div class="wrap">
+      <div class="head">
+        <div class="t"><span class="eyebrow">beat chance</span><h2>can a machine find my path?</h2><p class="lede">deal my songs in a random order. to draw the path, an order needs all five lights on.</p></div>
+      </div>
+      <div class="game">
+        <div class="card board">
+          <div class="btns">
+            <button type="button" class="btn primary" id="oShuf"><span class="ico" data-icon="dice"></span>deal a random order</button>
+            <button type="button" class="btn" id="oShuf1k">deal 1,000</button>
+            <button type="button" class="btn" id="oAuto"><span class="ico" data-icon="play"></span>autoplay</button>
+            <button type="button" class="btn" id="oCur"><span class="ico" data-icon="heart"></span>my order</button>
+          </div>
+          <div class="ostrip" id="labStrip" aria-hidden="true"></div>
+          <div class="res"><span class="big" id="labScore">5/5</span><span class="who" id="labWho" aria-live="polite">my order: all five lights on.</span></div>
+          <div class="ckrow" id="labChecks"></div>
+        </div>
+        <div class="card tally">
+          <h3 class="eyebrow">your deals</h3>
+          <div class="row"><span>random orders you dealt</span><b id="tN">0</b></div>
+          <div class="row"><span>with all five lights</span><b id="tK">0</b></div>
+          <div class="row"><span>your rate</span><b id="tR">–</b></div>
+          <div class="row"><span>in 10,000 deals</span><b>3.8%</b></div>
+          <div class="meter" aria-hidden="true"><i id="tM" style="width:0"></i></div>
+          <p class="cap">Autoplay always picks the most similar next song. It flows, but it doesn’t turn: it lights all five from 7 of 32 starting songs. Scored with the data’s three groups; with Jung’s own four figures my order lights four of five.</p>
+          <button type="button" class="btn" id="tallyReset" style="align-self:flex-start">reset</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="listen" class="gut">
+    <div class="wrap">
+      <div class="head">
+        <div class="t"><span class="eyebrow">how to listen</span><h2>five things to carry in</h2></div>
+        <div class="ctl" data-for="cueDeck"></div>
+      </div>
+      <div class="deck" id="cueDeck" style="grid-auto-columns:min(250px,72%)">
+        <div class="cue" style="--c:var(--a)"><span class="ico" data-icon="list"></span><p>in order. never on shuffle. the order is the poem.</p></div>
+        <div class="cue" style="--c:var(--pic)"><span class="ico" data-icon="twin"></span><p>ask who is speaking. one voice fights, one answers.</p></div>
+        <div class="cue" style="--c:var(--a)"><span class="ico" data-icon="arrow"></span><p>ask who they speak to. first them. then, slowly, you.</p></div>
+        <div class="cue" style="--c:var(--pic)"><span class="ico" data-icon="mute"></span><p>listen to the silences. when the words stop, the story doesn’t.</p></div>
+        <div class="cue"><span class="ico" data-icon="link"></span><p>don’t wait for peace at the end. wait for an alliance.</p></div>
+      </div>
+      <div class="promise">
+        <span class="eyebrow">a promise</span>
+        <p class="art">this is art.</p>
+        <p class="form">a form I had to invent, because none of the old ones could hold this war.</p>
+        <p class="soft">I call it a soul score: songs that already exist, put in an order that never existed, so that two voices can find each other, and you can find yours.</p>
+        <div class="sig"><i class="sq" style="--c:var(--a)" aria-hidden="true"></i><i class="ci" style="--c:var(--pic)" aria-hidden="true"></i><b>Inas</b></div>
+      </div>
+      <details class="more"><summary>what this does not claim</summary>
+        <p class="cap" style="color:var(--ink-2)">It reads one playlist; 32 of its first 39 songs carry enough words to count. A lexicon of 617 weighted words counts words and misses irony. Whom a song speaks to is a reading, not a measurement. Jung’s figures are names for the rooms, not a diagnosis. The epilogue (songs 40 to 47) came after the tests and is read by ear. The echoes are my associations, not sources.</p>
+      </details>
+    </div>
+  </section>
+</main>
+<footer class="gut"><div class="wrap"><span>I win · a soul score in 47 songs</span><span>songs named by title only · no lyrics quoted</span></div></footer>
+<div id="tip" hidden></div>
+
+<script id="data" type="application/json">{"themes": [{"key": "Sight and mirrors", "label": "Sight and mirrors", "short": "Sight", "mean": 2.349, "present": 23, "data": "Self", "jung": "Self", "top_n": 33, "top_title": "The Less I Know The Better", "top": 6.11, "share": 0.0813, "desc": "Looking, being seen, eyes, mirrors, images."}, {"key": "Speech and silence", "label": "Speech and silence", "short": "Speech", "mean": 2.389, "present": 22, "data": "Persona", "jung": "Persona", "top_n": 24, "top_title": "Ma meilleure amie", "top": 7.2, "share": 0.0942, "desc": "Saying, not saying, voices, words, language, silence."}, {"key": "Death and the dead", "label": "Death and the dead", "short": "Death", "mean": 0.992, "present": 10, "data": "Shadow", "jung": "Shadow", "top_n": 7, "top_title": "Thought I Was Dead (feat. ScHoolboy Q, Santigold)", "top": 8.66, "share": 0.2729, "desc": "Dying, the dead, ghosts, graves, killing."}, {"key": "Devil and the sacred", "label": "Devil and the sacred", "short": "Devil/sacred", "mean": 0.951, "present": 7, "data": "Shadow", "jung": "Shadow", "top_n": 37, "top_title": "Sanctuary", "top": 9.52, "share": 0.313, "desc": "God, the devil, hell, angels, prayer, sin."}, {"key": "Magic", "label": "Magic", "short": "Magic", "mean": 0.09, "present": 1, "data": "none", "jung": "none", "top_n": 7, "top_title": "Thought I Was Dead (feat. ScHoolboy Q, Santigold)", "top": 2.89, "share": 1.0, "desc": "Spells, charms, wands, trance, hypnosis, the magician."}, {"key": "Power and victory", "label": "Power and victory", "short": "Power", "mean": 1.108, "present": 10, "data": "Persona", "jung": "Persona", "top_n": 14, "top_title": "I'm Still Standing", "top": 7.97, "share": 0.2246, "desc": "Winning, crowns, kings, strength, money as rank."}, {"key": "Loyalty and trust", "label": "Loyalty and trust", "short": "Loyalty", "mean": 1.296, "present": 11, "data": "Shadow", "jung": "Anima", "top_n": 10, "top_title": "LOYALTY. (feat. Rihanna)", "top": 16.37, "share": 0.3948, "desc": "Trust, lies, truth, betrayal, promises, togetherness."}, {"key": "Highs and substances", "label": "Highs and substances", "short": "Highs", "mean": 1.111, "present": 7, "data": "Shadow", "jung": "Shadow", "top_n": 35, "top_title": "Wassup", "top": 8.78, "share": 0.247, "desc": "Drugs, alcohol, smoke, being high, getting sober."}, {"key": "Shelter and care", "label": "Shelter and care", "short": "Shelter", "mean": 1.718, "present": 10, "data": "Self", "jung": "Self", "top_n": 28, "top_title": "Safe (Joris Voorn Remix)", "top": 15.69, "share": 0.2853, "desc": "Safety, home, rest, comfort, healing, holding."}, {"key": "Water, sky and night", "label": "Water, sky and night", "short": "Night/water", "mean": 2.709, "present": 11, "data": "Self", "jung": "Anima", "top_n": 39, "top_title": "I Follow Rivers (The Magician Remix)", "top": 25.27, "share": 0.2916, "desc": "Night, moon, sun, stars, sea, rivers, darkness."}, {"key": "Return and repetition", "label": "Return and repetition", "short": "Return", "mean": 3.084, "present": 19, "data": "Self", "jung": "Self", "top_n": 13, "top_title": "Replay", "top": 20.5, "share": 0.2077, "desc": "Again, back, replay, memory, waiting, forever."}, {"key": "Animals and beasts", "label": "Animals and beasts", "short": "Beasts", "mean": 0.766, "present": 10, "data": "Self", "jung": "Shadow", "top_n": 30, "top_title": "She's My Collar (feat. Kali Uchis)", "top": 5.28, "share": 0.2153, "desc": "Monsters, beasts, snakes, dogs, prey, creatures."}, {"key": "The self and its doubles", "label": "The self and its doubles", "short": "Self/doubles", "mean": 0.627, "present": 8, "data": "Self", "jung": "Self", "top_n": 16, "top_title": "i", "top": 7.98, "share": 0.3979, "desc": "The self, ego, masks, doubles, shadows, identity."}, {"key": "Circus and play", "label": "Theater and party", "short": "Theater", "mean": 1.432, "present": 12, "data": "Persona", "jung": "Persona", "top_n": 38, "top_title": "Movie", "top": 9.87, "share": 0.2154, "desc": "Games, play, dance, show, stage, film, the circus."}], "tracks": [{"n": 1, "title": "FTCU", "artist": "Nicki Minaj", "voice": "A", "section": "Alone", "scored": true, "type": "Lyrics", "words": 308, "register": "Attack", "target": "Them", "op": null, "opLabel": null, "lang": null, "s": [0.974, 3.896, 0.0, 0.0, 0.0, 2.922, 0.974, 0.649, 0.974, 0.0, 0.325, 0.0, 1.299, 5.195], "p": [0.717, 0.0755, 0.0189, 0.1887], "dens": 17.21}, {"n": 2, "title": "Think U The Shit (Fart)", "artist": "Ice Spice", "voice": "A", "section": "Alone", "scored": true, "type": "Lyrics", "words": 411, "register": "Attack", "target": "Them", "op": null, "opLabel": null, "lang": null, "s": [2.433, 2.92, 0.0, 0.973, 0.0, 1.946, 0.0, 0.0, 0.73, 0.0, 0.0, 0.0, 0.487, 0.487], "p": [0.8125, 0.1094, 0.0, 0.0781], "dens": 9.98}, {"n": 3, "title": "HISS", "artist": "Megan Thee Stallion", "voice": "A", "section": "Alone", "scored": true, "type": "Lyrics", "words": 909, "register": "Attack", "target": "Them", "op": null, "opLabel": null, "lang": null, "s": [0.22, 2.09, 0.22, 0.44, 0.0, 1.1, 1.43, 0.33, 0.77, 0.0, 1.87, 0.22, 0.0, 0.66], "p": [0.6813, 0.1758, 0.0, 0.1429], "dens": 9.35}, {"n": 4, "title": "D'Evils", "artist": "SiR", "voice": "A", "section": "Alone", "scored": true, "type": "Lyrics", "words": 246, "register": "Refuge", "target": "Them", "op": null, "opLabel": null, "lang": null, "s": [1.626, 0.813, 0.0, 3.659, 0.0, 0.813, 0.0, 3.659, 1.626, 0.0, 1.626, 0.0, 0.0, 1.626], "p": [0.6579, 0.2368, 0.1053, 0.0], "dens": 15.45}, {"n": 5, "title": "Sticky (feat. GloRilla, Sexyy Red, Lil Wayne)", "artist": "Tyler, The Creator", "voice": "A", "section": "Alone", "scored": true, "type": "Lyrics", "words": 674, "register": "Attack", "target": "Them", "op": null, "opLabel": null, "lang": null, "s": [1.187, 2.819, 0.0, 0.445, 0.0, 0.0, 0.148, 0.742, 0.593, 0.0, 0.297, 0.0, 0.0, 0.0], "p": [0.6724, 0.1724, 0.0345, 0.1207], "dens": 6.23}, {"n": 6, "title": "Drop It Like It's Hot", "artist": "Snoop Dogg, Pharrell Williams", "voice": "A", "section": "Alone", "scored": false, "type": "Signal", "words": 1, "register": "Attack", "target": "Them", "op": null, "opLabel": null, "lang": null}, {"n": 7, "title": "Thought I Was Dead (feat. ScHoolboy Q, Santigold)", "artist": "Tyler, The Creator", "voice": "A", "section": "Alone", "scored": true, "type": "Lyrics", "words": 277, "register": "Defiance", "target": "Them", "op": null, "opLabel": null, "lang": null, "s": [3.61, 0.0, 8.664, 0.0, 2.888, 0.722, 0.722, 0.722, 0.361, 0.0, 0.722, 1.083, 0.0, 3.61], "p": [0.6341, 0.1463, 0.0, 0.2195], "dens": 23.1}, {"n": 8, "title": "Alright", "artist": "Kendrick Lamar", "voice": "A", "section": "Alone", "scored": true, "type": "Lyrics", "words": 536, "register": "Defiance", "target": "Them", "op": null, "opLabel": null, "lang": null, "s": [2.052, 3.172, 1.493, 3.918, 0.0, 0.373, 0.0, 0.0, 0.746, 0.0, 0.746, 1.306, 0.0, 0.0], "p": [0.5321, 0.2294, 0.2202, 0.0183], "dens": 13.81}, {"n": 9, "title": "Stronger", "artist": "Kanye West", "voice": "A", "section": "Alone", "scored": true, "type": "Lyrics", "words": 424, "register": "Defiance", "target": "Them", "op": null, "opLabel": null, "lang": null, "s": [0.0, 0.943, 0.943, 3.066, 0.0, 3.302, 0.708, 0.943, 0.0, 2.123, 0.943, 0.0, 0.0, 1.179], "p": [0.597, 0.2687, 0.0746, 0.0597], "dens": 14.15}, {"n": 10, "title": "LOYALTY. (feat. Rihanna)", "artist": "Kendrick Lamar, Rihanna", "voice": "Pic", "section": "The pact", "scored": true, "type": "Lyrics", "words": 507, "register": "Pact", "target": "Us", "op": null, "opLabel": null, "lang": null, "s": [0.394, 3.55, 2.367, 0.592, 0.0, 1.578, 16.371, 2.959, 0.789, 0.986, 1.775, 0.0, 0.0, 0.0], "p": [0.6029, 0.3382, 0.0441, 0.0147], "dens": 31.36}, {"n": 11, "title": "Day 'N' Nite (Nightmare)", "artist": "Kid Cudi", "voice": "A", "section": "The pact", "scored": true, "type": "Lyrics", "words": 205, "register": "Wound", "target": "Self", "op": null, "opLabel": null, "lang": null, "s": [3.902, 1.463, 0.0, 0.0, 0.0, 0.976, 0.0, 4.39, 2.439, 15.61, 0.0, 0.0, 0.0, 3.415], "p": [0.8571, 0.0714, 0.0714, 0.0], "dens": 32.2}, {"n": 12, "title": "INDAR ABAWI", "artist": "Tchubi", "voice": "Pic", "section": "The pact", "scored": false, "type": "Signal", "words": null, "register": "Attack", "target": "Them", "op": null, "opLabel": null, "lang": null}, {"n": 13, "title": "Replay", "artist": "Lady Gaga", "voice": "A", "section": "Integration", "scored": true, "type": "Lyrics", "words": 239, "register": "Wound", "target": "You", "op": null, "opLabel": null, "lang": null, "s": [0.0, 2.51, 2.51, 0.0, 0.0, 0.0, 0.0, 0.837, 0.418, 0.0, 20.502, 2.51, 1.255, 2.092], "p": [0.7576, 0.2424, 0.0, 0.0], "dens": 32.64}, {"n": 14, "title": "I'm Still Standing", "artist": "Elton John", "voice": "Pic", "section": "Integration", "scored": true, "type": "Lyrics", "words": 251, "register": "Defiance", "target": "You", "op": null, "opLabel": null, "lang": null, "s": [2.789, 0.0, 0.0, 0.0, 0.0, 7.968, 1.594, 0.0, 0.797, 0.0, 7.171, 0.0, 1.195, 2.39], "p": [0.561, 0.4146, 0.0244, 0.0], "dens": 23.9}, {"n": 15, "title": "Butterfly's Repose", "artist": "Zabawa", "voice": "A", "section": "Integration", "scored": true, "type": "Lyrics", "words": 184, "register": "Tenderness", "target": "You", "op": null, "opLabel": null, "lang": null, "s": [4.891, 2.717, 0.543, 1.63, 0.0, 2.174, 0.0, 0.0, 6.522, 3.261, 3.261, 3.261, 1.63, 0.0], "p": [0.3889, 0.5556, 0.0278, 0.0278], "dens": 29.89}, {"n": 16, "title": "i", "artist": "Kendrick Lamar", "voice": "Pic", "section": "Integration", "scored": true, "type": "Lyrics", "words": 639, "register": "Defiance", "target": "Them", "op": null, "opLabel": null, "lang": null, "s": [4.069, 2.034, 0.782, 3.756, 0.0, 0.626, 0.469, 0.469, 3.912, 2.504, 2.973, 0.469, 7.981, 0.782], "p": [0.7879, 0.1717, 0.0101, 0.0303], "dens": 30.83}, {"n": 17, "title": "On Melancholy Hill", "artist": "Gorillaz", "voice": "Pic", "section": "Integration", "scored": true, "type": "Lyrics", "words": 130, "register": "Pact", "target": "Us", "op": null, "opLabel": null, "lang": null, "s": [4.615, 0.769, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3.846, 3.846, 0.0, 2.308, 0.0, 0.0], "p": [0.3913, 0.5217, 0.087, 0.0], "dens": 15.38}, {"n": 18, "title": "Abracadabra (Gesaffelstein Remix)", "artist": "Lady Gaga, Gesaffelstein", "voice": "A", "section": "Techno break", "scored": false, "type": "Title only", "words": 1, "register": "Pulse", "target": "No words", "op": "Cast a spell", "opLabel": "spell word", "lang": "title only"}, {"n": 19, "title": "Express Yourself", "artist": "A B P, Karashnikov", "voice": "A", "section": "Techno break", "scored": false, "type": "Title only", "words": 2, "register": "Pulse", "target": "You", "op": "Cast a spell", "opLabel": "command", "lang": "title only"}, {"n": 20, "title": "I SMELL FEAR", "artist": "RAGETRAIN", "voice": "A", "section": "Techno break", "scored": false, "type": "Title only", "words": 3, "register": "Pulse", "target": "No words", "op": "Cast a spell", "opLabel": "scent of prey", "lang": "title only"}, {"n": 21, "title": "Passi (Deborah De Luca Remix)", "artist": "Io E Palmieri, Deborah De Luca", "voice": "Pic", "section": "Techno break", "scored": true, "type": "Lyrics", "words": 84, "register": "Wound", "target": "You", "op": "Undo the spell", "opLabel": "confession", "lang": "Italian", "s": [5.952, 4.762, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.381, 0.0, 3.571, 0.0, 0.0, 7.143], "p": [0.4, 0.6, 0.0, 0.0], "dens": 23.81}, {"n": 22, "title": "Intro", "artist": "The xx", "voice": "Pic", "section": "Techno break", "scored": false, "type": "Instrumental", "words": 1, "register": "Pulse", "target": "No words", "op": "Undo the spell", "opLabel": "silence", "lang": "no words"}, {"n": 23, "title": "Lemon", "artist": "N.E.R.D, Rihanna, Pharrell Williams", "voice": "A", "section": "Counter magic", "scored": true, "type": "Lyrics", "words": 254, "register": "Attack", "target": "Them", "op": "Defend against deceit", "opLabel": "charm and war", "lang": "English", "s": [3.543, 1.969, 0.394, 0.0, 0.0, 0.0, 1.969, 0.787, 0.787, 0.787, 4.724, 0.787, 0.0, 0.0], "p": [0.6774, 0.1935, 0.0, 0.129], "dens": 15.75}, {"n": 24, "title": "Ma meilleure amie", "artist": "Vald", "voice": "A", "section": "Counter magic", "scored": true, "type": "Lyrics", "words": 264, "register": "Refuge", "target": "Self", "op": "Diagnose the spell inside", "opLabel": "possession", "lang": "French", "s": [4.924, 7.197, 2.273, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.758, 4.545, 1.894, 1.136, 0.0], "p": [0.975, 0.0, 0.025, 0.0], "dens": 22.73}, {"n": 25, "title": "POWER", "artist": "Kanye West", "voice": "A", "section": "Counter magic", "scored": true, "type": "Lyrics", "words": 583, "register": "Wound", "target": "Self", "op": "Diagnose the spell inside", "opLabel": "ego's diagnosis", "lang": "English", "s": [1.544, 6.003, 1.887, 0.686, 0.0, 5.66, 0.0, 1.201, 0.858, 0.0, 0.0, 0.0, 2.573, 0.343], "p": [0.5769, 0.1282, 0.0769, 0.2179], "dens": 20.75}, {"n": 26, "title": "Alter Ego", "artist": "NTO", "voice": "Pic", "section": "Wordless response", "scored": false, "type": "Instrumental", "words": 2, "register": "Pulse", "target": "No words", "op": "Diagnose the spell inside", "opLabel": "the double", "lang": "no words"}, {"n": 27, "title": "Not Like Us", "artist": "Kendrick Lamar", "voice": "A", "section": "Back to dialogue", "scored": true, "type": "Lyrics", "words": 546, "register": "Attack", "target": "Them", "op": null, "opLabel": null, "lang": null, "s": [2.198, 2.564, 1.099, 1.465, 0.0, 0.0, 0.549, 0.549, 0.733, 0.733, 0.366, 2.564, 0.0, 1.465], "p": [0.3582, 0.3134, 0.0896, 0.2388], "dens": 14.29}, {"n": 28, "title": "Safe (Joris Voorn Remix)", "artist": "Monkey Safari, Joris Voorn", "voice": "A", "section": "Back to dialogue", "scored": true, "type": "Lyrics", "words": 51, "register": "Tenderness", "target": "You", "op": null, "opLabel": null, "lang": null, "s": [5.882, 3.922, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 15.686, 17.647, 3.922, 0.0, 0.0, 3.922], "p": [0.5333, 0.4667, 0.0, 0.0], "dens": 50.98}, {"n": 29, "title": "Bad Girls", "artist": "M.I.A.", "voice": "Pic", "section": "Back to dialogue", "scored": true, "type": "Lyrics", "words": 208, "register": "Defiance", "target": "Us", "op": null, "opLabel": null, "lang": null, "s": [2.885, 0.962, 3.846, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.923, 0.0, 0.0, 0.0], "p": [0.7419, 0.2258, 0.0323, 0.0], "dens": 9.62}, {"n": 30, "title": "She's My Collar (feat. Kali Uchis)", "artist": "Gorillaz, Kali Uchis", "voice": "A", "section": "Back to dialogue", "scored": true, "type": "Lyrics", "words": 360, "register": "Pact", "target": "You", "op": null, "opLabel": null, "lang": null, "s": [0.0, 1.944, 0.833, 0.278, 0.0, 0.556, 1.667, 0.0, 0.833, 1.944, 0.833, 5.278, 2.5, 0.0], "p": [0.7, 0.2714, 0.0286, 0.0], "dens": 16.67}, {"n": 31, "title": "Borderline", "artist": "Tame Impala", "voice": "Pic", "section": "Back to dialogue", "scored": true, "type": "Lyrics", "words": 339, "register": "Wound", "target": "Self", "op": null, "opLabel": null, "lang": null, "s": [1.18, 1.77, 1.18, 0.0, 0.0, 0.0, 3.54, 4.13, 0.59, 6.195, 0.0, 0.0, 0.0, 0.59], "p": [0.8333, 0.0333, 0.1, 0.0333], "dens": 19.17}, {"n": 32, "title": "Dreams (Remastered 2026)", "artist": "The Cranberries", "voice": "A", "section": "Back to dialogue", "scored": true, "type": "Lyrics", "words": 163, "register": "Tenderness", "target": "You", "op": null, "opLabel": null, "lang": null, "s": [1.227, 1.227, 0.0, 0.0, 0.0, 0.0, 1.227, 0.0, 0.0, 0.0, 1.227, 0.0, 0.0, 0.0], "p": [0.6538, 0.3077, 0.0, 0.0385], "dens": 4.91}, {"n": 33, "title": "The Less I Know The Better", "artist": "Tame Impala", "voice": "A", "section": "Back to dialogue", "scored": true, "type": "Lyrics", "words": 229, "register": "Wound", "target": "You", "op": null, "opLabel": null, "lang": null, "s": [6.114, 5.24, 0.0, 0.0, 0.0, 1.31, 4.367, 0.0, 2.183, 1.31, 6.114, 0.0, 0.0, 0.0], "p": [0.4565, 0.4565, 0.0435, 0.0435], "dens": 26.64}, {"n": 34, "title": "Work", "artist": "Charlotte Day Wilson", "voice": "Pic", "section": "Back to dialogue", "scored": true, "type": "Lyrics", "words": 81, "register": "Pact", "target": "Us", "op": null, "opLabel": null, "lang": null, "s": [0.0, 0.0, 0.0, 0.0, 0.0, 2.469, 1.235, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "p": [0.7143, 0.2857, 0.0, 0.0], "dens": 3.7}, {"n": 35, "title": "Wassup", "artist": "A$AP Rocky", "voice": "Pic", "section": "Back to dialogue", "scored": true, "type": "Lyrics", "words": 205, "register": "Defiance", "target": "Us", "op": null, "opLabel": null, "lang": null, "s": [2.927, 6.829, 0.0, 0.0, 0.0, 0.976, 0.0, 8.78, 0.976, 0.0, 2.439, 0.0, 0.0, 0.0], "p": [0.5909, 0.0909, 0.2273, 0.0909], "dens": 22.93}, {"n": 36, "title": "505", "artist": "Arctic Monkeys", "voice": "A", "section": "Sacred sanctuary", "scored": true, "type": "Lyrics", "words": 226, "register": "Tenderness", "target": "You", "op": null, "opLabel": null, "lang": null, "s": [2.212, 0.0, 0.0, 0.0, 0.0, 0.0, 1.327, 0.0, 0.442, 0.0, 5.752, 1.77, 0.0, 0.0], "p": [0.4722, 0.5278, 0.0, 0.0], "dens": 11.5}, {"n": 37, "title": "Sanctuary", "artist": "Joji", "voice": "A", "section": "Sacred sanctuary", "scored": true, "type": "Lyrics", "words": 189, "register": "Pact", "target": "Us", "op": null, "opLabel": null, "lang": null, "s": [0.0, 0.529, 0.0, 9.524, 0.0, 0.0, 3.175, 0.0, 3.175, 3.704, 6.349, 1.058, 0.0, 1.058], "p": [0.5161, 0.4516, 0.0323, 0.0], "dens": 28.57}, {"n": 38, "title": "Movie", "artist": "Tom Misch", "voice": "A", "section": "Sacred sanctuary", "scored": true, "type": "Lyrics", "words": 385, "register": "Wound", "target": "You", "op": null, "opLabel": null, "lang": null, "s": [1.818, 1.818, 0.519, 0.0, 0.0, 0.0, 0.0, 0.0, 1.818, 0.0, 11.429, 0.0, 0.0, 9.87], "p": [0.6032, 0.3492, 0.0317, 0.0159], "dens": 27.27}, {"n": 39, "title": "I Follow Rivers (The Magician Remix)", "artist": "Lykke Li, The Magician", "voice": "Pic", "section": "Sacred sanctuary", "scored": true, "type": "Lyrics", "words": 91, "register": "Tenderness", "target": "You", "op": null, "opLabel": null, "lang": null, "s": [0.0, 0.0, 2.198, 0.0, 0.0, 0.0, 0.0, 4.396, 0.0, 25.275, 3.297, 0.0, 0.0, 0.0], "p": [0.6667, 0.3333, 0.0, 0.0], "dens": 35.16}], "sections": [{"name": "Alone", "f": 1, "t": 9, "n": 9, "scored": 8, "density": 13.7, "pron": {"I": 0.6630474627399218, "you": 0.176785343787709, "we": 0.056678024119237794, "they": 0.10348916935313138}, "con_data": {"Persona": 1.0818562660045297, "Shadow": 1.0615327397222858, "Self": 0.36839965360734034}, "con_theory": {"Persona": 1.0818562660045297, "Shadow": 1.0719632899029554, "Anima": 0.2410189726819127, "Self": 0.42165944388938437}, "lead_data": "Persona", "lead_theory": "Persona"}, {"name": "The pact", "f": 10, "t": 12, "n": 3, "scored": 2, "density": 31.8, "pron": {"I": 0.7300420168067228, "you": 0.20483193277310924, "we": 0.057773109243697475, "they": 0.007352941176470588}, "con_data": {"Persona": 1.131171451928387, "Shadow": 2.7819768714497526, "Self": 0.867493998074458}, "con_theory": {"Persona": 1.131171451928387, "Shadow": 1.2029595676602534, "Anima": 4.689701458889989, "Self": 0.5354075714561921}, "lead_data": "Shadow", "lead_theory": "Anima"}, {"name": "Integration", "f": 13, "t": 17, "n": 5, "scored": 5, "density": 26.5, "pron": {"I": 0.5773246783851238, "you": 0.38121404929464314, "we": 0.029845110704071465, "they": 0.011616161616161615}, "con_data": {"Persona": 1.1168780446895272, "Shadow": 0.6149110142905135, "Self": 2.0310406317446734}, "con_theory": {"Persona": 1.1168780446895272, "Shadow": 1.093381452640091, "Anima": 0.5139983052624422, "Self": 2.3110913566362115}, "lead_data": "Self", "lead_theory": "Self"}, {"name": "Techno break", "f": 18, "t": 22, "n": 5, "scored": 1, "density": 23.8, "pron": {"I": 0.39999999999999997, "you": 0.6, "we": 0.0, "they": 0.0}, "con_data": {"Persona": 2.327090952347995, "Shadow": 0.0, "Self": 0.8462361541662684}, "con_theory": {"Persona": 2.327090952347995, "Shadow": 0.0, "Anima": 0.0, "Self": 1.2693542312494026}, "lead_data": "Persona", "lead_theory": "Persona"}, {"name": "Counter magic", "f": 23, "t": 25, "n": 3, "scored": 3, "density": 19.7, "pron": {"I": 0.7431141439205956, "you": 0.1072511717673008, "we": 0.03397435897435897, "they": 0.11566032533774469}, "con_data": {"Persona": 1.2996269434326522, "Shadow": 0.7182518760075581, "Self": 1.011875660573082}, "con_theory": {"Persona": 1.2996269434326522, "Shadow": 0.883413922548771, "Anima": 0.34821703389701564, "Self": 1.1785429273699022}, "lead_data": "Persona", "lead_theory": "Persona"}, {"name": "Wordless response", "f": 26, "t": 26, "n": 1, "scored": 0, "density": null, "pron": null, "con_data": null, "con_theory": null, "lead_data": null, "lead_theory": null}, {"name": "Back to dialogue", "f": 27, "t": 35, "n": 9, "scored": 9, "density": 18.8, "pron": {"I": 0.6202637559925455, "you": 0.27238947581205436, "we": 0.05790363555953558, "they": 0.049443132635864626}, "con_data": {"Persona": 0.7112473447215675, "Shadow": 0.8520437729448579, "Self": 0.9577392501716394}, "con_theory": {"Persona": 0.7112473447215675, "Shadow": 0.866720715675508, "Anima": 1.1102141317259462, "Self": 0.8668248666638358}, "lead_data": "Self", "lead_theory": "Anima"}, {"name": "Sacred sanctuary", "f": 36, "t": 39, "n": 4, "scored": 4, "density": 25.6, "pron": {"I": 0.5645481310803891, "you": 0.4154825908858166, "we": 0.016001024065540194, "they": 0.003968253968253968}, "con_data": {"Persona": 0.7178047148798238, "Shadow": 1.2615199208358114, "Self": 1.165273807209681}, "con_theory": {"Persona": 0.7178047148798238, "Shadow": 1.2751847683823776, "Anima": 1.771468871806986, "Self": 0.8485114273644625}, "lead_data": "Shadow", "lead_theory": "Anima"}], "con_data": {"Persona": ["Speech and silence", "Power and victory", "Circus and play"], "Shadow": ["Devil and the sacred", "Death and the dead", "Loyalty and trust", "Highs and substances"], "Self": ["Sight and mirrors", "Shelter and care", "Animals and beasts", "Water, sky and night", "Return and repetition", "The self and its doubles"]}, "con_theory": {"Persona": ["Speech and silence", "Power and victory", "Circus and play"], "Shadow": ["Devil and the sacred", "Death and the dead", "Animals and beasts", "Highs and substances"], "Anima": ["Loyalty and trust", "Water, sky and night"], "Self": ["Sight and mirrors", "Shelter and care", "The self and its doubles", "Return and repetition"]}, "ramp": [7, 10, 34, 9, 29, 30, 31, 3, 32, 13, 36, 39, 37, 8, 27, 5, 4, 14, 25, 2, 23, 1, 35, 24, 17, 38, 16, 11, 33, 15, 21, 28], "shuffle": {"data": {"each": [0.5032, 0.4864, 0.5032, 0.4333, 0.4917], "all5": 0.0379, "mean_n": 2.4178, "ge4": 0.2138, "dist": [783, 1721, 2548, 2810, 1759, 379]}, "theory": {"each": [0.5231, 0.4759, 0.4849, 0.4596, 0.4917], "all5": 0.0368, "mean_n": 2.4352, "ge4": 0.2185, "dist": [699, 1728, 2648, 2740, 1817, 368]}}, "autoplay": {"data": {"each": [0.65625, 0.46875, 0.78125, 0.65625, 0.4375], "all5": 0.21875, "n_all5": 7, "mean_n": 3.0, "dist": [1, 7, 5, 4, 8, 7], "seeds_all5": [2, 4, 23, 27, 30, 35, 36], "ftcu": [true, false, true, true, false]}, "theory": {"each": [0.4375, 0.125, 0.8125, 0.28125, 0.4375], "all5": 0.0, "n_all5": 0, "mean_n": 2.09375, "dist": [2, 8, 10, 9, 3, 0], "seeds_all5": [], "ftcu": [true, false, true, false, false]}}, "curator": {"data": [true, true, true, true, true], "theory": [true, true, false, true, true]}, "coherence": {"curator": 0.06588752685145238, "curator_z": -0.0017736603752915858, "shuffle_mean": -0.0006306364865744178, "shuffle_sd": 0.05086102121051532, "shuffle_p_ge": 0.1004899510048995, "shuffle_mean_z": -1.0641117332497796e-05, "autoplay_mean": 0.5628171981471483, "autoplay_min": 0.5419621382366062, "autoplay_mean_z": 0.3120898288175825, "ramp": 0.12766966333179486, "ramp_z": 0.17883679797671237, "adjcos": {"curator": 0.43836366609659116, "shuffle": 0.3983695342665835, "autoplay": 0.7371432743525634, "ramp": 0.47551025564654315}}, "signals": {"signals_mean": 0.09879323230452793, "signals_each": [0.15510308474564122, 0.04248337986341463], "signals_p_low": 0.010149492525373732, "signals_shuffle_median": 0.394968018888197, "others_mean": 0.5453663267479875, "others_each": [0.47336463120312877, 0.6477040589229046, 0.515030290117929], "others_p_high": 0.12644367781610918, "others_shuffle_median": 0.3947985280202281, "ordinary_mean": 0.45213800785158875, "ordinary_min": 0.07370846071967475, "ordinary_n": 26}, "you_trend": {"rho": 0.3599706744868035, "p_perm": 0.023397660233976603}}</script>
+<script>// Five checks of Jung's line, ported from research/algos_final.py. Works in node (module.exports) and the browser (window.Engine).
+(function (root) {
+  function makeEngine(DATA) {
+    const TH = DATA.themes.map((t) => t.key);
+    const TI = Object.fromEntries(TH.map((t, i) => [t, i]));
+    const scored = DATA.tracks.filter((t) => t.scored);            // 32 songs, playlist order
+    const MU = TH.map((_, j) => scored.reduce((a, t) => a + t.s[j], 0) / scored.length);
+    const Q = 8;
+    const byN = Object.fromEntries(scored.map((t) => [t.n, t]));
+
+    function composite(order, groups) {
+      const out = {};
+      for (const [k, members] of Object.entries(groups)) {
+        out[k] = order.map((n) => { const s = byN[n].s; return members.reduce((a, m) => a + s[TI[m]] / MU[TI[m]], 0) / members.length; });
+      }
+      return out;
+    }
+    function rolling(v, w = 8) {
+      const h1 = Math.floor(w / 2), h2 = w - h1;
+      return v.map((_, i) => { const seg = v.slice(Math.max(0, i - h1), i + h2); return seg.reduce((a, b) => a + b, 0) / seg.length; });
+    }
+    const mean = (a) => a.reduce((x, y) => x + y, 0) / a.length;
+    const argmax = (a) => a.reduce((bi, x, i) => (x > a[bi] ? i : bi), 0);
+
+    function evaluate(order, groups) {
+      const comp = composite(order, groups);
+      const roll = Object.fromEntries(Object.entries(comp).map(([k, v]) => [k, rolling(v)]));
+      const per = comp.Persona, sel = comp.Self, rs = roll.Shadow, rself = roll.Self;
+      const n = order.length;
+      const c1 = mean(per.slice(0, Q)) > mean(sel.slice(0, Q));
+      const ps = argmax(rs), pself = argmax(rself);
+      const c2 = ps < pself;
+      const c3 = mean(sel.slice(n - Q)) > mean(per.slice(n - Q));
+      let c4 = false, dipAt = null, backAt = null;
+      const before = rs.slice(0, pself), after = rs.slice(pself);
+      if (before.length && Math.max(...before) > 1 && after.some((x) => x < 1)) {
+        const dip = after.findIndex((x) => x < 1);
+        const back = after.slice(dip).findIndex((x) => x > 1);
+        c4 = back >= 0; dipAt = order[pself + dip]; backAt = back >= 0 ? order[pself + dip + back] : null;
+      }
+      const you = order.map((k) => byN[k].p[1]);
+      const youFirst = mean(you.slice(0, Q)), youLast = mean(you.slice(n - Q));
+      const c5 = youLast > youFirst;
+      return {
+        pass: [c1, c2, c3, c4, c5], comp, roll,
+        detail: {
+          personaFirst: mean(per.slice(0, Q)), selfFirst: mean(sel.slice(0, Q)),
+          shadowPeak: order[ps], selfPeak: order[pself],
+          selfLast: mean(sel.slice(n - Q)), personaLast: mean(per.slice(n - Q)),
+          dipAt, backAt, youFirst, youLast,
+        },
+      };
+    }
+    // autoplay: greedy most-similar next song (cosine of the 14-theme vectors)
+    const unit = Object.fromEntries(scored.map((t) => { const nr = Math.hypot(...t.s); return [t.n, t.s.map((x) => x / nr)]; }));
+    const cosine = (a, b) => unit[a].reduce((acc, x, i) => acc + x * unit[b][i], 0);
+    function autoplay(seed) {
+      const order = [seed]; const left = new Set(scored.map((t) => t.n)); left.delete(seed);
+      while (left.size) {
+        const cur = order[order.length - 1]; let best = null, bv = -Infinity;
+        for (const j of left) { const v = cosine(cur, j); if (v > bv) { bv = v; best = j; } }
+        order.push(best); left.delete(best);
+      }
+      return order;
+    }
+    function shuffle(rand = Math.random) {
+      const a = scored.map((t) => t.n);
+      for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+      return a;
+    }
+    function coherence(order) {
+      const Y = order.map((n) => unit[n]); const m = Y.length;
+      let adj = 0; for (let i = 1; i < m; i++) adj += Y[i].reduce((a, x, k) => a + (x - Y[i - 1][k]) ** 2, 0);
+      let all = 0; for (let i = 0; i < m; i++) for (let j = i + 1; j < m; j++) all += Y[i].reduce((a, x, k) => a + (x - Y[j][k]) ** 2, 0);
+      return 1 - (m / 2) * adj / all;
+    }
+    return { TH, MU, scored, curatorOrder: scored.map((t) => t.n), evaluate, autoplay, shuffle, coherence, rolling };
+  }
+  if (typeof module !== "undefined") module.exports = makeEngine; else root.makeEngine = makeEngine;
+})(typeof window !== "undefined" ? window : globalThis);
+</script>
+<script>
+(function () {
+  "use strict";
+  const D = JSON.parse(document.getElementById("data").textContent);
+  const E = makeEngine(D);
+  const SECS = D.sections;
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, attrs = {}, ...kids) => {
+    const e = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (v == null) continue;
+      if (k === "class") e.className = v; else if (k === "style") e.style.cssText = v; else if (k === "text") e.textContent = v;
+      else if (k.startsWith("on")) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v);
+    }
+    for (const k of kids) if (k != null) e.append(k instanceof Node ? k : document.createTextNode(String(k)));
+    return e;
+  };
+  const NS = "http://www.w3.org/2000/svg";
+  const svgEl = (tag, attrs = {}) => { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e; };
+  const fmt = (x, d = 2) => (x == null || isNaN(x) ? "–" : x.toFixed(d));
+  const shortTitle = (t) => t.replace(/\s*\((feat\.|with )[^)]*\)/i, "").replace(/\s*\([^)]*(Remix|Remastered)[^)]*\)/i, "").trim();
+
+  // ---------- icons: simple stroke drawings, 24px grid
+  const IC = {
+    ballot: '<path d="M3 10l9-6 9 6M5 10v8M9.7 10v8M14.3 10v8M19 10v8M3 20.5h18"/>',
+    people: '<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><circle cx="17" cy="9" r="2.6"/><path d="M16.5 14.2c2.8.2 4.5 2.4 4.5 5.3"/>',
+    scale: '<path d="M12 4v16M7 20h10M5 7h14M5 7l-3 6h6zM19 7l-3 6h6z"/>',
+    cpu: '<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>',
+    heart: '<path d="M12 20s-7-4.4-7-9.6A4 4 0 0 1 12 8a4 4 0 0 1 7 2.4C19 15.6 12 20 12 20z"/>',
+    eye: '<path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+    twin: '<circle cx="9" cy="12" r="5.5"/><circle cx="15" cy="12" r="5.5"/>',
+    flame: '<path d="M12 2.8c.8 3.6 5.2 5.4 5.2 10.2a5.2 5.2 0 0 1-10.4 0c0-2.6 1.4-4.3 2.6-5.3.2 2.1 1.3 3.3 2.6 3.4-.9-3.1-.2-6.1 0-8.3z"/>',
+    link: '<path d="M9.5 14.5l5-5"/><path d="M11 6.5l1.6-1.6a4 4 0 0 1 5.7 5.7l-1.6 1.6"/><path d="M13 17.5l-1.6 1.6a4 4 0 0 1-5.7-5.7l1.6-1.6"/>',
+    yin: '<circle cx="12" cy="12" r="9"/><path d="M12 3a4.5 4.5 0 0 1 0 9 4.5 4.5 0 0 0 0 9"/><circle cx="12" cy="7.5" r=".9"/><circle cx="12" cy="16.5" r=".9"/>',
+    pulse: '<path d="M2 12h4l2.5-6 4 12 3-9 2 3h4.5"/>',
+    spark: '<path d="M12 3v5M12 16v5M3 12h5M16 12h5M5.6 5.6l3.2 3.2M15.2 15.2l3.2 3.2M5.6 18.4l3.2-3.2M15.2 8.8l3.2-3.2"/>',
+    mirror: '<ellipse cx="12" cy="9.5" rx="6" ry="7"/><path d="M12 16.5V21M8 21h8M9.6 6.8a3 3 0 0 1 2.4-1.5"/>',
+    mute: '<path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/>',
+    talk: '<path d="M4 5h10a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H9l-4 3v-3H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/><path d="M19 9h1a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-1v2.5L16 18h-4"/>',
+    wave: '<path d="M2 9c2.5-2 4.5-2 7 0s4.5 2 7 0 4.5-2 6 0M2 15c2.5-2 4.5-2 7 0s4.5 2 7 0 4.5-2 6 0"/>',
+    swords: '<path d="M4 4l10.5 10.5M20 4L9.5 14.5M6.5 17.5L4 20M17.5 17.5L20 20M8 13l3 3M16 13l-3 3"/>',
+    mask: '<path d="M4 6c3 1.5 13 1.5 16 0 0 7-3 12-8 12S4 13 4 6z"/><path d="M8 10.5h2.5M13.5 10.5H16M10 14.5c1.2.8 2.8.8 4 0"/>',
+    moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
+    compass: '<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
+    self: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.3"/>',
+    dice: '<rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1.1"/><circle cx="15" cy="15" r="1.1"/><circle cx="12" cy="12" r="1.1"/>',
+    play: '<path d="M4 6l7 6-7 6zM13 6l7 6-7 6z"/>',
+    list: '<path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/>',
+    arrow: '<path d="M4 12h14M13 7l5 5-5 5"/>',
+    back: '<path d="M15 6l-6 6 6 6"/>',
+    fwd: '<path d="M9 6l6 6-6 6"/>',
+    check: '<path d="M5 12.5l4.5 4.5L19 7"/>',
+    cross: '<path d="M7 7l10 10M17 7L7 17"/>',
+    ret: '<path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v4.5h-4.5"/>',
+    redo: '<path d="M4 12a8 8 0 1 0 2.3-5.7M4 4v4.5h4.5"/>',
+  };
+  const icon = (name, cls = "") => { const s = el("span", { class: "ico " + cls, "aria-hidden": "true" }); s.innerHTML = `<svg viewBox="0 0 24 24">${IC[name] || ""}</svg>`; return s; };
+  document.querySelectorAll("[data-icon]").forEach((n) => { n.setAttribute("aria-hidden", "true"); n.innerHTML = `<svg viewBox="0 0 24 24">${IC[n.dataset.icon] || ""}</svg>`; });
+
+  // ---------- tooltip
+  const tip = $("tip");
+  function showTip(x, y, build) {
+    tip.replaceChildren(); build(tip); tip.hidden = false;
+    const r = tip.getBoundingClientRect(); const vw = document.documentElement.clientWidth;
+    let left = x + 14, top = y + 14;
+    if (left + r.width > vw - 8) left = x - r.width - 14;
+    if (top + r.height > window.innerHeight - 8) top = y - r.height - 14;
+    tip.style.left = Math.max(8, left) + "px"; tip.style.top = Math.max(8, top) + "px";
+  }
+  const hideTip = () => { tip.hidden = true; };
+
+  // ---------- data: 39 analysed songs + the epilogue
+  const EPI = [
+    { n: 40, title: "family ties", artist: "Baby Keem, Kendrick Lamar", voice: "A", target: "Them" },
+    { n: 41, title: "3005", artist: "Childish Gambino", voice: "A", target: "You" },
+    { n: 42, title: "Nightcall", artist: "Kavinsky", voice: "Pic", target: "You" },
+    { n: 43, title: "Princess Diana", artist: "Ice Spice, Nicki Minaj", voice: "A", target: "Them" },
+    { n: 44, title: "Ni**as in Paris", artist: "JAY-Z, Kanye West", voice: "A", target: "Them" },
+    { n: 45, title: "Hit ’Em Up", artist: "2Pac, Outlawz", voice: "A", target: "Them" },
+    { n: 46, title: "The Spins", artist: "Mac Miller", voice: "Pic", target: "You" },
+    { n: 47, title: "Hit ’Em Up", artist: "2Pac, Outlawz", voice: "A", target: "Them" },
+  ];
+  const ALL = D.tracks.concat(EPI.map((t) => Object.assign({ scored: false, epi: true }, t)));
+  const byN = Object.fromEntries(ALL.map((t) => [t.n, t]));
+  const ROOMS = SECS.map((s) => ({ name: s.name, f: s.f, t: s.t })).concat([{ name: "Epilogue", f: 40, t: 47 }]);
+  const roomOf = (n) => ROOMS.findIndex((r) => n >= r.f && n <= r.t);
+  const VC = { A: "var(--a)", Pic: "var(--pic)" };
+  const POS = { Them: "t", You: "y", Us: "y", Self: "n", "No words": "n" };
+  const TO = { Them: "them", You: "you", Us: "us", Self: "itself", "No words": "no words" };
+  const FIGC = { Persona: "var(--persona)", Shadow: "var(--shadow)", Anima: "var(--anima)", Self: "var(--self)" };
+  const FIGPLAIN = { Persona: "the mask", Shadow: "the shadow", Anima: "the soul-guide", Self: "the Self" };
+  const FIGICON = { Persona: "mask", Shadow: "moon", Anima: "compass", Self: "self" };
+  const FIGORDER = ["Persona", "Shadow", "Anima", "Self"];
+
+  // ---------- deck controls (arrows + counter), shared by every deck
+  function wireDeck(deck) {
+    const ctl = document.querySelector(`.ctl[data-for="${deck.id}"]`); if (!ctl) return;
+    const prev = el("button", { type: "button", class: "arrow", "aria-label": "Previous card" }, icon("back"));
+    const next = el("button", { type: "button", class: "arrow", "aria-label": "Next card" }, icon("fwd"));
+    const count = el("span", { class: "count", "aria-live": "polite" });
+    ctl.replaceChildren(prev, count, next);
+    const step = () => { const c = deck.children[0]; return c ? c.getBoundingClientRect().width + parseFloat(getComputedStyle(deck).columnGap || 14) : 300; };
+    const update = () => {
+      const n = deck.children.length; const i = Math.min(n - 1, Math.round(deck.scrollLeft / step()));
+      count.textContent = `${i + 1} / ${n}`;
+      prev.disabled = deck.scrollLeft < 4; next.disabled = deck.scrollLeft + deck.clientWidth >= deck.scrollWidth - 4;
+    };
+    prev.addEventListener("click", () => deck.scrollBy({ left: -step(), behavior: "smooth" }));
+    next.addEventListener("click", () => deck.scrollBy({ left: step(), behavior: "smooth" }));
+    deck.addEventListener("scroll", () => { window.requestAnimationFrame(update); }, { passive: true });
+    window.addEventListener("resize", update);
+    update();
+    return { update, to: (i) => deck.scrollTo({ left: i * step(), behavior: "smooth" }) };
+  }
+
+  // ---------- the score (hero)
+  let selected = 10;
+  function renderScore() {
+    const kids = [el("div", { class: "axis", "aria-hidden": "true" }, el("span", { text: "them" }), el("span", { text: "you" }))];
+    ROOMS.forEach((r) => {
+      const n = r.t - r.f + 1;
+      const room = el("div", { class: "room" + (r.name === "Epilogue" ? " epi" : ""), style: `width:${Math.max(76, n * 16 + (n - 1) * 2)}px` });
+      const field = el("div", { class: "field", role: "group", "aria-label": `${r.name}, songs ${r.f} to ${r.t}` });
+      for (let k = r.f; k <= r.t; k++) {
+        const t = byN[k];
+        const b = el("button", { type: "button", class: `mk ${POS[t.target]}${t.voice === "Pic" ? " pic" : ""}`, style: `--c:${VC[t.voice]}`, "aria-label": `Song ${k}, ${t.title}, ${t.voice}, to ${TO[t.target]}` }, el("i", {}));
+        b.dataset.n = k;
+        b.addEventListener("click", () => { selected = k; markSel(); renderReadout(); });
+        b.addEventListener("pointermove", (ev) => showTip(ev.clientX, ev.clientY, (T) => T.append(el("div", { class: "tt", text: `${k} · ${shortTitle(t.title)}` }), el("div", { class: "tm", text: `${t.voice} · to ${TO[t.target]}` }))));
+        b.addEventListener("pointerleave", hideTip);
+        field.append(b);
+      }
+      room.append(field, el("div", { class: "rn", text: r.name }));
+      kids.push(room);
+    });
+    $("scoreStrip").replaceChildren(...kids);
+    markSel();
+  }
+  function markSel() { document.querySelectorAll("#scoreStrip .mk").forEach((b) => { const on = +b.dataset.n === selected; b.classList.toggle("sel", on); b.setAttribute("aria-pressed", String(on)); }); }
+  function renderReadout() {
+    const t = byN[selected];
+    $("readout").replaceChildren(el("span", { class: "n", text: `${t.n} / 47 · ${ROOMS[roomOf(t.n)].name}` }), el("span", { class: "tt", text: shortTitle(t.title) }), el("span", { class: "by", text: t.artist }),
+      el("span", { class: "to" }, el("i", { class: t.voice === "Pic" ? "ci" : "sq", style: `--c:${VC[t.voice]};margin-right:6px;vertical-align:-1px` }), `${t.voice} → ${TO[t.target]}`));
+  }
+  renderScore(); renderReadout();
+
+  // ---------- flip cards
+  document.querySelectorAll(".flip").forEach((f) => f.addEventListener("click", () => f.setAttribute("aria-pressed", String(f.getAttribute("aria-pressed") !== "true"))));
+  wireDeck($("talkDeck"));
+
+  // ---------- the platform's bubbles
+  const CHARS = [
+    { n: "Vampire", g: "what you play", t: "mood", d: "Drawn to moody, emotional, atmospheric music.", miss: "the darkness here is staged, then answered. the work ends in a sanctuary, not in the mood it starts with." },
+    { n: "Luminary", g: "what you play", t: "mood", d: "Favours cheerful, energetic music.", miss: "energy can carry spells instead of joy. the hardest techno sits at the centre, in the room of magic." },
+    { n: "Cyclops", g: "what you play", t: "genre range", d: "Devoted to one genre.", miss: "I move from rap to hard techno to tender pop on purpose, in English, French, Italian and Arabic." },
+    { n: "Mastermind", g: "what you play", t: "genre range", d: "Samples many genres instead of a few.", miss: "why the genres change where they do. the changes fall on the doors between rooms." },
+    { n: "Fanatic", g: "what you play", t: "artists", d: "Loyal to one top artist.", miss: "no single artist leads here. the order leads." },
+    { n: "Shapeshifter", g: "how you play", t: "artists over time", d: "Moves fast from one artist to the next.", miss: "whether a shift is a passing mood or a planned turn in a story." },
+    { n: "Time Traveler", g: "how you play", t: "replays", d: "Keeps returning to the same tracks.", miss: "return and repetition is the largest theme in my lyrics. the platform counts replays; it never hears songs about coming back." },
+    { n: "Hunter", g: "how you play", t: "discovery and skips", d: "Always searching, skips more than others.", miss: "the songs that were kept after the search, and the place each one was given." },
+    { n: "Hypnotist", g: "how you play", t: "albums in order", d: "Plays albums start to finish.", miss: "an order the listener writes herself. the Hypnotist follows the artist’s order, not her own." },
+    { n: "Roboticist", g: "how you play", t: "the algorithm", d: "Lets recommendations choose, one song after another.", miss: "the opposite of curation. beat chance, below, lets you try its logic, autoplay, on my songs.", key: true },
+    { n: "Alchemist", g: "what you make", t: "playlists made", d: "Makes their own playlists more than most.", miss: "the platform counts how many playlists you make. it never reads what they say, in which order, or to whom.", key: true },
+    { n: "Collector", g: "what you make", t: "own playlists played", d: "Mostly plays their own playlists.", miss: "why a playlist feels flawless to the one who made it. this work shows it from the inside." },
+  ];
+  const popped = new Set(); let bubSel = null;
+  const rnd = (i, k) => { const x = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return x - Math.floor(x); };
+  const bubNodes = CHARS.map((c, i) => {
+    const b = el("button", { type: "button", "aria-label": `${c.n}: reads ${c.t}. Pop to see what it would miss` }, el("span", { class: "nm", text: c.n }), el("span", { class: "gp", text: "reads " + c.t }));
+    const w = el("div", { class: "bub", style: `--dur:${(7 + rnd(i, 1) * 5).toFixed(1)}s;--del:-${(rnd(i, 2) * 8).toFixed(1)}s;--dx:${Math.round((rnd(i, 3) - .5) * 26)}px;--dy:${Math.round((rnd(i, 4) - .5) * 22)}px` }, b);
+    b.addEventListener("click", () => {
+      bubSel = i;
+      if (!popped.has(i)) { popped.add(i); w.classList.remove("burst"); void w.offsetWidth; w.classList.add("burst"); setTimeout(() => w.classList.add("popped"), 260); }
+      renderBubInfo();
+    });
+    return w;
+  });
+  $("bubField").replaceChildren(...bubNodes);
+  function layoutBubbles() {
+    const F = $("bubField"); const W = F.clientWidth, H = F.clientHeight;
+    const cols = W < 520 ? 3 : W < 860 ? 4 : 6, rows = Math.ceil(CHARS.length / cols);
+    const cw = W / cols, ch = H / rows, base = Math.min(cw, ch);
+    bubNodes.forEach((w, i) => {
+      const c = CHARS[i], col = i % cols, row = Math.floor(i / cols);
+      const size = Math.round(base * (0.7 + rnd(i, 5) * 0.14) * (c.key ? 1.1 : 1));
+      const cx = col * cw + cw / 2 + (rnd(i, 6) - .5) * (cw - size) * 0.7, cy = row * ch + ch / 2 + (rnd(i, 7) - .5) * (ch - size) * 0.7;
+      w.style.width = w.style.height = size + "px";
+      w.style.left = Math.max(4, Math.min(W - size - 4, cx - size / 2)) + "px";
+      w.style.top = Math.max(4, Math.min(H - size - 4, cy - size / 2)) + "px";
+      w.style.setProperty("--fs", Math.max(14, Math.min(24, size * 0.14)).toFixed(1) + "px");
+    });
+  }
+  function renderBubInfo() {
+    bubNodes.forEach((w, i) => { w.classList.toggle("sel", i === bubSel); w.querySelector("button").setAttribute("aria-pressed", String(popped.has(i))); });
+    $("popCount").textContent = `${popped.size} / ${CHARS.length} popped`;
+    const box = $("bubInfo");
+    if (bubSel == null) { box.replaceChildren(el("div", { class: "stack" }, el("span", { class: "eyebrow", text: "tap a bubble" }), el("p", { class: "me", text: "the platform watches how you play. it never reads what your order says." }))); return; }
+    const c = CHARS[bubSel];
+    const kids = [
+      el("div", { style: "display:flex;flex-direction:column;gap:8px" }, el("span", { class: "eyebrow", text: `${c.g} · reads ${c.t}` }), el("span", { class: "nm2", text: "The " + c.n }), el("p", { text: c.d })),
+      el("div", { style: "display:flex;flex-direction:column;gap:8px" }, el("span", { class: "eyebrow", text: "what it would miss in I win" }), el("p", { class: "me", text: c.miss })),
+    ];
+    if (popped.size === CHARS.length) kids.push(el("div", { style: "grid-column:1 / -1;border-top:1px solid var(--line);padding-top:12px" }, el("p", { class: "me", text: "every bubble popped. bubbles burst. knowing yourself doesn’t." })));
+    box.replaceChildren(...kids);
+  }
+  $("blowAgain").addEventListener("click", () => { popped.clear(); bubSel = null; bubNodes.forEach((w) => w.classList.remove("popped", "burst", "sel")); renderBubInfo(); });
+  layoutBubbles(); renderBubInfo();
+  window.addEventListener("resize", () => layoutBubbles());
+
+  // ---------- rooms deck
+  const RC = [
+    ["flame", "one voice, alone, at war with them. nobody answers yet.", ["Persona", "Shadow"], "the mask & the shadow", "all 9 songs speak to them."],
+    ["link", "a second voice answers. a promise is made in the dark.", ["Anima"], "the soul-guide", "the soul-guide hits 4.7× its average."],
+    ["yin", "the two voices start talking to each other, not about the others.", ["Self"], "the Self", "“you” beats “I” for the first time, at song 15."],
+    ["pulse", "the words fall away. only the pulse, in the middle of the night.", ["Persona"], "the mask, as magic", "song 20 sits at the exact centre of the first 39."],
+    ["spark", "spells against spells. the voice turns inward and meets its shadow.", ["Persona"], "the mask, seen from inside", "2 of its 3 songs speak to the self."],
+    ["mute", "the other voice answers without a single word.", ["Shadow"], "the shadow, as a double", "no lyrics. the title says Alter Ego."],
+    ["talk", "the words come back, softer. them slowly becomes you.", ["Anima"], "the soul-guide", "7 of 9 songs speak to you or us."],
+    ["wave", "water. rest. nobody to fight here.", ["Anima"], "the soul-guide", "not one song speaks to them."],
+    ["swords", "the war is never over. but Pic is by A’s side now. I win becomes we win.", [], "two voices, side by side", "A answers the pact of song 10, thirty-one songs later."],
+  ];
+  $("roomDeck").replaceChildren(...ROOMS.map((r, i) => {
+    const [ic, line, figs, leadTxt, fact] = RC[i];
+    const mini = el("div", { class: "mini", "aria-hidden": "true" });
+    for (let k = r.f; k <= r.t; k++) { const t = byN[k]; mini.append(el("span", { class: `${POS[t.target]}${t.voice === "Pic" ? " pic" : ""}`, style: `--c:${VC[t.voice]}` }, el("i", {}))); }
+    const lead = el("span", { class: "lead" }, ...figs.map((f) => el("i", { class: f === "Anima" ? "dash" : "", style: `--c:${FIGC[f]}` })), (figs.length ? "leads: " : "") + leadTxt);
+    return el("article", { class: "card rc", "aria-label": `Room ${i + 1}, ${r.name}` },
+      el("div", { class: "top2" }, el("span", { class: "num", text: `${String(i + 1).padStart(2, "0")} · ${r.f === r.t ? "song " + r.f : "songs " + r.f + "–" + r.t}` }), icon(ic, "big")),
+      el("h3", { text: r.name }), el("p", { class: "line", text: line }), mini,
+      el("div", { class: "foot" }, lead, el("span", { class: "fact", text: fact })));
+  }));
+  wireDeck($("roomDeck"));
+
+  // ---------- guess the echo
+  const Q = [
+    { ic: "eye", room: "the frame", clue: "a soul at war with the machines, and one very old piece of advice.", q: "Which film about humans at war with machines hides “know thyself” on a kitchen sign?",
+      o: ["The Matrix", "The Terminator", "WALL·E"], a: 0, r: "In The Matrix, a plaque in the Oracle’s kitchen reads Temet nosce: know thyself. The oldest advice, in the middle of a war against machines. That’s where I stand." },
+    { ic: "twin", room: "the form", clue: "two voices, one soul. sometimes they fight. sometimes they talk.", q: "Which famous scene is one creature arguing with itself in two voices?",
+      o: ["Batman and Robin", "Gollum and Sméagol", "Mario and Luigi"], a: 1, r: "In The Two Towers, Sméagol argues with Gollum by night and sends him away, for a while. My two voices learn the opposite: to stay." },
+    { ic: "flame", room: "room 1 · Alone", clue: "one voice, alone, at war with them. nine songs, and nobody answers.", q: "Which ancient poem’s very first word is “rage”?",
+      o: ["The Odyssey", "The Divine Comedy", "The Iliad"], a: 2, r: "The Iliad opens on rage: Achilles, cut off from the others, furious at all of them. Europe’s oldest poem starts where I start." },
+    { ic: "link", room: "room 2 · The pact", clue: "a second voice answers. a promise of loyalty, made in the dark, before the hard road.", q: "Which friendship is that kind of pact?",
+      o: ["Sherlock and Moriarty", "Tom and Jerry", "Frodo and Sam"], a: 2, r: "Sam promises not to leave Frodo, and keeps it all the way to the mountain. A bond offered before the road, kept on it." },
+    { ic: "yin", room: "room 3 · Integration", clue: "the voices stop fighting. care given to the other comes back as care for yourself.", q: "Which film is saved when one feeling finally lets another one lead?",
+      o: ["Inside Out", "Toy Story", "Finding Nemo"], a: 0, r: "Joy only saves Riley when she lets Sadness take the controls. Integration isn’t one voice winning. It’s both at the same desk." },
+    { ic: "spark", room: "room 4 · Techno break", clue: "the words stop. the titles cast spells. the first one is an old magic word.", q: "Which saga built its deadliest curse on that same magic word?",
+      o: ["The Lord of the Rings", "Harry Potter", "Star Wars"], a: 1, r: "J.K. Rowling has said Avada Kedavra comes from an ancient Aramaic spell, the origin of abracadabra. Song 18 is called Abracadabra." },
+    { ic: "mirror", room: "room 5 · Counter magic", clue: "the voice turns inward and finds the enemy was inside all along.", q: "In which film does a hero strike down his enemy and find his own face?",
+      o: ["Indiana Jones", "Jurassic Park", "The Empire Strikes Back"], a: 2, r: "In the cave on Dagobah, Luke strikes at Vader. The mask breaks open, and the face inside is his own. Jung called this meeting the shadow." },
+    { ic: "mute", room: "room 6 · Wordless response", clue: "one answer, without a single word. its title is Alter Ego.", q: "Which film, named after Jung’s word for the mask, has a woman who stops speaking?",
+      o: ["Persona", "Mamma Mia!", "Titanic"], a: 0, r: "In Bergman’s Persona (1966), an actress stops speaking and her nurse does all the talking, until their two faces merge into one." },
+    { ic: "wave", room: "room 8 · Sacred sanctuary", clue: "water. rest. the last song follows the rivers.", q: "Which novel ends with a man hearing every voice in a river?",
+      o: ["Moby-Dick", "Siddhartha", "The Old Man and the Sea"], a: 1, r: "Hesse’s Siddhartha ends as a ferryman who hears all the river’s voices as one. Moby-Dick has water too, but no rest: it is still at war." },
+    { ic: "swords", room: "epilogue", clue: "the blow falls twice. the war is never over. but the two voices stand together now.", q: "The song struck twice comes from which real war?",
+      o: ["Tupac vs Biggie, 1996", "Kendrick vs Drake, 2024", "Oasis vs Blur, 1995"], a: 0, r: "Hit ’Em Up was fired in the East Coast–West Coast feud of 1996. Kendrick vs Drake is in here too: Not Like Us is song 27, the enemy’s last return." },
+  ];
+  const answers = Q.map(() => null);
+  let quizCtl;
+  function renderPips() { $("pips").replaceChildren(...answers.map((a, i) => el("i", { class: a == null ? "" : a ? "ok" : "no", title: `Echo ${i + 1}: ${a == null ? "not played" : a ? "found" : "missed"}` }))); $("pips").setAttribute("aria-label", `Echoes found: ${answers.filter(Boolean).length} of ${Q.length}`); }
+  const VERDICT = (k) => (k === 10 ? "you hear like I do." : k >= 7 ? "you were listening." : k >= 4 ? "now go and listen to the songs." : "good. the songs will tell you the rest.");
+  function renderQuiz() {
+    const cards = Q.map((x, i) => {
+      const opts = el("div", { class: "opts", role: "group", "aria-label": "Answers" });
+      const reveal = el("p", { class: "reveal", hidden: "" });
+      const next = el("button", { type: "button", class: "btn nextq", hidden: "" }, i < Q.length - 1 ? "next echo" : "see my score", icon("arrow"));
+      next.addEventListener("click", () => quizCtl && quizCtl.to(i + 1));
+      x.o.forEach((o, j) => {
+        const b = el("button", { type: "button" }, el("span", { text: o }));
+        b.addEventListener("click", () => {
+          answers[i] = j === x.a;
+          opts.querySelectorAll("button").forEach((bb, jj) => { bb.disabled = true; if (jj === x.a) { bb.classList.add("right"); bb.append(icon("check")); } else if (jj === j) { bb.classList.add("wrong"); bb.append(icon("cross")); } });
+          reveal.replaceChildren(el("b", { text: j === x.a ? "found it" : "the echo was " + x.o[x.a] }), x.r);
+          reveal.hidden = false; next.hidden = false; renderPips(); renderFinal(); next.focus({ preventScroll: true });
+        });
+        opts.append(b);
+      });
+      return el("article", { class: "card qc", "aria-label": `Echo ${i + 1} of ${Q.length}` },
+        el("div", { class: "qtop" }, el("span", { class: "badge" }, icon(x.ic)), el("span", { class: "qn", text: `echo ${i + 1} / ${Q.length} · ${x.room}` })),
+        el("p", { class: "clue", text: x.clue }), el("p", { class: "qq", text: x.q }), opts, reveal, next);
+    });
+    cards.push(el("article", { class: "card final", id: "finalCard" }));
+    $("quizDeck").replaceChildren(...cards);
+    renderPips(); renderFinal();
+  }
+  function renderFinal() {
+    const done = answers.filter((a) => a != null).length, k = answers.filter(Boolean).length;
+    const again = el("button", { type: "button", class: "btn" }, icon("redo"), "play again");
+    again.addEventListener("click", () => { answers.fill(null); renderQuiz(); quizCtl.to(0); });
+    $("finalCard").replaceChildren(el("span", { class: "eyebrow", text: "your echoes" }), el("span", { class: "big", text: `${k}/${Q.length}` }),
+      el("p", { class: "say", text: done < Q.length ? `${Q.length - done} still to find. swipe back and play them.` : VERDICT(k) }), again);
+  }
+  renderQuiz();
+  quizCtl = wireDeck($("quizDeck"));
+
+  // ---------- the score of the soul (line chart)
+  let focus = null;
+  function lineChart(node, order, groups, opts = {}) {
+    const res = E.evaluate(order, groups);
+    const keys = Object.keys(groups).sort((a, b) => FIGORDER.indexOf(a) - FIGORDER.indexOf(b));
+    const cs = getComputedStyle(node); const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    const W = Math.max(300, node.clientWidth - padX), H = opts.h || 300;
+    const m = { l: 28, r: 70, t: 24, b: 28 };
+    const n = order.length, iw = W - m.l - m.r, ih = H - m.t - m.b;
+    let ymax = 0; keys.forEach((k) => res.roll[k].forEach((v) => (ymax = Math.max(ymax, v)))); ymax = Math.max(2, Math.ceil(ymax * 2) / 2);
+    const x = (i) => m.l + (i / (n - 1)) * iw, y = (v) => m.t + ih - (v / ymax) * ih;
+    const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img", "aria-label": "Jung's four figures along my order" });
+    const stepX = iw / (n - 1);
+    SECS.forEach((s, si) => {
+      const idx = order.map((nn, i) => [nn, i]).filter(([nn]) => nn >= s.f && nn <= s.t).map(([, i]) => i);
+      if (!idx.length) return;
+      const x0 = x(idx[0]) - stepX / 2, x1 = x(idx[idx.length - 1]) + stepX / 2;
+      if (si % 2 === 0) svg.append(svgEl("rect", { class: "band", x: Math.max(m.l - 4, x0), y: m.t - 18, width: Math.min(x1, W - m.r + 4) - Math.max(m.l - 4, x0), height: ih + 18, rx: 4 }));
+      const tl = svgEl("text", { x: (Math.max(m.l, x0) + Math.min(x1, W - m.r)) / 2, y: m.t - 6, "text-anchor": "middle" }); tl.textContent = String(si + 1); svg.append(tl);
+    });
+    for (let v = 0; v <= ymax + 1e-9; v += ymax > 3 ? 1 : 0.5) {
+      if (Math.abs(v - 1) < 1e-9) continue;
+      svg.append(svgEl("line", { class: "grid", x1: m.l, x2: W - m.r, y1: y(v), y2: y(v) }));
+      const tl = svgEl("text", { x: m.l - 6, y: y(v) + 3.5, "text-anchor": "end" }); tl.textContent = v.toFixed(v % 1 ? 1 : 0); svg.append(tl);
+    }
+    svg.append(svgEl("line", { class: "avg", x1: m.l, x2: W - m.r, y1: y(1), y2: y(1) }));
+    const al = svgEl("text", { x: m.l - 6, y: y(1) + 3.5, "text-anchor": "end" }); al.textContent = "1"; svg.append(al);
+    const every = stepX < 11 ? 4 : stepX < 20 ? 2 : 1;
+    order.forEach((nn, i) => { if (i % every) return; const tl = svgEl("text", { x: x(i), y: H - m.b + 16, "text-anchor": "middle" }); tl.textContent = String(nn); svg.append(tl); });
+    const ends = [];
+    keys.forEach((k) => {
+      const dim = focus && focus !== k;
+      const pts = res.roll[k].map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+      svg.append(svgEl("polyline", { points: pts, fill: "none", stroke: FIGC[k], "stroke-width": focus === k ? 3 : 2, "stroke-opacity": dim ? 0.18 : 1, "stroke-linejoin": "round", "stroke-linecap": "round", "stroke-dasharray": k === "Anima" ? "6 4" : "none" }));
+      if (!dim) ends.push({ k, y: y(res.roll[k][n - 1]) });
+    });
+    if (focus) {
+      const r = res.roll[focus]; const pk = r.reduce((bi, v, i) => (v > r[bi] ? i : bi), 0);
+      svg.append(svgEl("circle", { cx: x(pk), cy: y(r[pk]), r: 6, fill: FIGC[focus], stroke: "var(--panel)", "stroke-width": 2.5 }));
+      const lt = svgEl("text", { class: "lab", x: x(pk), y: y(r[pk]) - 12, "text-anchor": "middle" }); lt.textContent = `peak · song ${order[pk]}`; svg.append(lt);
+    }
+    ends.sort((a, b) => a.y - b.y); for (let i = 1; i < ends.length; i++) if (ends[i].y - ends[i - 1].y < 15) ends[i].y = ends[i - 1].y + 15;
+    ends.forEach((e) => {
+      svg.append(svgEl("line", { x1: W - m.r + 2, x2: W - m.r + 10, y1: e.y, y2: e.y, stroke: FIGC[e.k], "stroke-width": 2.5 }));
+      const t = svgEl("text", { class: "lab", x: W - m.r + 14, y: e.y + 4 }); t.textContent = e.k; svg.append(t);
+    });
+    const xh = svgEl("line", { class: "xh", y1: m.t, y2: m.t + ih, visibility: "hidden" }); svg.append(xh);
+    const hit = svgEl("rect", { x: m.l - 8, y: 0, width: iw + 16, height: H, fill: "transparent", tabindex: "0", "aria-label": "Use the arrow keys to read each song" }); svg.append(hit);
+    let cur = n - 1;
+    const hide = () => { hideTip(); xh.setAttribute("visibility", "hidden"); };
+    const show = (i, cx, cy) => {
+      cur = i; xh.setAttribute("x1", x(i)); xh.setAttribute("x2", x(i)); xh.setAttribute("visibility", "visible");
+      const t = byN[order[i]];
+      showTip(cx, cy, (T) => { T.append(el("div", { class: "tt", text: `${t.n} · ${shortTitle(t.title)}` }), el("div", { class: "tm", text: ROOMS[roomOf(t.n)].name }));
+        keys.slice().sort((a, b) => res.roll[b][i] - res.roll[a][i]).forEach((k) => T.append(el("div", { class: "tr" }, el("i", { class: k === "Anima" ? "dash" : "", style: `--c:${FIGC[k]}` }), `${fmt(res.roll[k][i])} · ${FIGPLAIN[k]}`))); });
+    };
+    hit.addEventListener("pointermove", (ev) => { const r = svg.getBoundingClientRect(); const px = ((ev.clientX - r.left) / r.width) * W; show(Math.max(0, Math.min(n - 1, Math.round(((px - m.l) / iw) * (n - 1)))), ev.clientX, ev.clientY); });
+    hit.addEventListener("pointerleave", hide);
+    hit.addEventListener("keydown", (ev) => { if (ev.key === "ArrowRight" || ev.key === "ArrowLeft") { ev.preventDefault(); const i = Math.max(0, Math.min(n - 1, cur + (ev.key === "ArrowRight" ? 1 : -1))); const r = svg.getBoundingClientRect(); show(i, r.left + (x(i) / W) * r.width, r.top + 20); } });
+    hit.addEventListener("blur", hide);
+    node.replaceChildren(svg);
+  }
+  function renderChips() {
+    const all = el("button", { type: "button", class: "chip", "aria-pressed": String(focus === null), style: "--c:var(--ink-2)" }, icon("eye"), "all four");
+    all.addEventListener("click", () => { focus = null; renderSoul(); });
+    $("figChips").replaceChildren(all, ...FIGORDER.map((k) => {
+      const b = el("button", { type: "button", class: "chip", "aria-pressed": String(focus === k), style: `--c:${FIGC[k]}` }, icon(FIGICON[k]), el("span", {}, k + " ", el("small", { text: FIGPLAIN[k] })));
+      b.addEventListener("click", () => { focus = focus === k ? null : k; renderSoul(); });
+      return b;
+    }));
+  }
+  function renderSoul() { renderChips(); lineChart($("lineChart"), E.curatorOrder, D.con_theory, { h: 300 }); }
+  renderSoul();
+
+  // ---------- beat chance
+  const CK = [["mask", "the mask opens"], ["moon", "shadow before Self"], ["self", "the mask lowers"], ["ret", "the shadow returns"], ["arrow", "“you” rises"]];
+  let tally = { n: 0, all5: 0 };
+  try { const s = JSON.parse(localStorage.getItem("iwin-chance") || "null"); if (s && typeof s.n === "number") tally = s; } catch (e) { /* storage unavailable */ }
+  const saveTally = () => { try { localStorage.setItem("iwin-chance", JSON.stringify(tally)); } catch (e) { /* ignore */ } };
+  function play(order, who, anim) {
+    const res = E.evaluate(order, D.con_data); const k = res.pass.filter(Boolean).length;
+    const strip = $("labStrip"); strip.classList.remove("anim");
+    strip.replaceChildren(...order.map((n, i) => { const t = byN[n]; const s = el("span", { class: t.voice === "Pic" ? "pic" : "", style: `--c:${VC[t.voice]};animation-delay:${i * 12}ms` }); return s; }));
+    if (anim) { void strip.offsetWidth; strip.classList.add("anim"); }
+    $("labScore").textContent = `${k}/5`;
+    $("labWho").textContent = who + (k === 5 ? " all five lights on." : k === 0 ? " no lights at all." : ` ${k} of five lights.`);
+    $("labChecks").replaceChildren(...CK.map(([ic, nm], i) => el("div", { class: "ck" + (res.pass[i] ? " ok" : "") }, el("span", { class: "dot" }, icon(ic)), el("span", { class: "lb", text: nm + (res.pass[i] ? "" : " · off") }))));
+    return k;
+  }
+  function renderTally() {
+    $("tN").textContent = tally.n.toLocaleString("en"); $("tK").textContent = tally.all5.toLocaleString("en");
+    const r = tally.n ? tally.all5 / tally.n : 0; $("tR").textContent = tally.n ? (100 * r).toFixed(1) + "%" : "–";
+    $("tM").style.width = Math.min(100, (r / 0.1) * 100).toFixed(1) + "%";
+  }
+  const score1 = (o) => { const k = E.evaluate(o, D.con_data).pass.filter(Boolean).length; tally.n++; if (k === 5) tally.all5++; return k; };
+  $("oShuf").addEventListener("click", () => { const o = E.shuffle(); score1(o); saveTally(); play(o, `deal no. ${tally.n.toLocaleString("en")}:`, true); renderTally(); });
+  $("oShuf1k").addEventListener("click", () => { let o; for (let i = 0; i < 1000; i++) { o = E.shuffle(); score1(o); } saveTally(); play(o, `the last of 1,000 deals:`, true); renderTally(); });
+  $("oAuto").addEventListener("click", () => { const seeds = E.curatorOrder; const seed = seeds[Math.floor(Math.random() * seeds.length)]; play(E.autoplay(seed), `autoplay from song ${seed}:`, true); });
+  $("oCur").addEventListener("click", () => play(E.curatorOrder, "my order:", true));
+  $("tallyReset").addEventListener("click", () => { tally = { n: 0, all5: 0 }; saveTally(); renderTally(); });
+  play(E.curatorOrder, "my order:", false); renderTally();
+
+  wireDeck($("cueDeck"));
+
+  // ---------- nav
+  const links = [...document.querySelectorAll("#navList a")];
+  const secs = links.map((a) => document.querySelector(a.getAttribute("href")));
+  function onScroll() {
+    const mid = window.innerHeight * 0.3; let on = -1;
+    secs.forEach((s, i) => { if (s && s.getBoundingClientRect().top < mid) on = i; });
+    links.forEach((a, i) => a.classList.toggle("on", i === on));
+    const h = document.documentElement; const p = h.scrollTop / Math.max(1, h.scrollHeight - h.clientHeight);
+    $("prog").style.width = (Math.min(1, Math.max(0, p)) * 100).toFixed(1) + "%";
+  }
+  window.addEventListener("scroll", onScroll, { passive: true }); onScroll();
+  window.addEventListener("scroll", hideTip, { passive: true });
+  let rt, lastW = window.innerWidth;
+  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { if (window.innerWidth !== lastW) { lastW = window.innerWidth; renderSoul(); } }, 150); });
+})();
+</script>
+
+</body></html>
